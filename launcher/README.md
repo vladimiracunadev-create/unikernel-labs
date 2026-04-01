@@ -55,9 +55,20 @@ windows/src/UnikernelLabs.Launcher
 
 1. dejar sano el dashboard localhost y el runtime WSL
 2. sincronizar el catalogo del launcher
-3. compilar o publicar la app
+3. generar el instalador o publicar la app
 4. configurar distro y path Linux
 5. probar `Start / Health / Open` sobre `nginx-runtime`
+
+## Build recomendado
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\windows\scripts\build-windows-installer.ps1
+```
+
+Ese flujo genera y verifica:
+
+- `artifacts/publish/win-x64/UnikernelLabs.Launcher.exe`
+- `artifacts/installer/UnikernelControlCenter-1.0.0-win-x64-setup.exe`
 
 ## Lo que representa esta v1
 
@@ -70,6 +81,6 @@ Si representa:
 
 Todavia no representa:
 
-- instalador final
+- MSI firmado o auto-actualizacion
 - administracion avanzada de imagenes o redes
 - reemplazo funcional completo de Docker Desktop

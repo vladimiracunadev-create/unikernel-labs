@@ -281,18 +281,59 @@ public sealed class MainForm : Form
         var split = new SplitContainer
         {
             Dock = DockStyle.Fill,
-            SplitterDistance = 430,
             BackColor = BackColor,
-            Panel1MinSize = 380,
-            Panel2MinSize = 640,
             FixedPanel = FixedPanel.Panel1
         };
+        split.HandleCreated += (_, _) => BeginInvoke(new MethodInvoker(() => ConfigureWorkAreaSplit(split)));
+        split.SizeChanged += (_, _) => ConfigureWorkAreaSplit(split);
         split.Panel1.Padding = new Padding(0, 10, 8, 10);
         split.Panel2.Padding = new Padding(8, 10, 0, 10);
 
         split.Panel1.Controls.Add(BuildLeftPanel());
         split.Panel2.Controls.Add(BuildRightPanel());
         return split;
+    }
+
+    private static void ConfigureWorkAreaSplit(SplitContainer split)
+    {
+        const int desiredLeftWidth = 430;
+        const int minLeftWidth = 380;
+        const int minRightWidth = 640;
+
+        if (split.IsDisposed)
+        {
+            return;
+        }
+
+        var availableWidth = split.ClientSize.Width - split.SplitterWidth;
+        if (availableWidth <= 0)
+        {
+            return;
+        }
+
+        var maxLeftWidth = availableWidth - minRightWidth;
+        if (maxLeftWidth < minLeftWidth)
+        {
+            split.Panel1MinSize = 0;
+            split.Panel2MinSize = 0;
+
+            var fallbackWidth = Math.Max(0, Math.Min(desiredLeftWidth, availableWidth / 2));
+            if (split.SplitterDistance != fallbackWidth)
+            {
+                split.SplitterDistance = fallbackWidth;
+            }
+
+            return;
+        }
+
+        split.Panel1MinSize = minLeftWidth;
+        split.Panel2MinSize = minRightWidth;
+
+        var targetWidth = Math.Clamp(desiredLeftWidth, minLeftWidth, maxLeftWidth);
+        if (split.SplitterDistance != targetWidth)
+        {
+            split.SplitterDistance = targetWidth;
+        }
     }
 
     private Control BuildLeftPanel()

@@ -9,6 +9,12 @@
     <AssemblyName>UnikernelLabs.Launcher</AssemblyName>
     <RootNamespace>UnikernelLabs.Launcher</RootNamespace>
     <ApplicationIcon>app.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <InformationalVersion>1.0.0</InformationalVersion>
+    <Product>Unikernel Control Center</Product>
+    <Company>Unikernel Labs</Company>
   </PropertyGroup>
 
   <ItemGroup>

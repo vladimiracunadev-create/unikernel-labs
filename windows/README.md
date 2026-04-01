@@ -13,6 +13,7 @@ Windows aporta:
 - automatizacion PowerShell
 - apertura de `localhost`
 - publicacion del `.exe`
+- build de un instalador `.exe` con Inno Setup
 
 No aporta ni necesita una publicacion del dashboard en GitHub Pages.
 
@@ -46,6 +47,10 @@ El runtime real sigue estando en:
 - `scripts/health-lab.ps1`
 - `scripts/open-lab.ps1`
 - `scripts/publish-launcher.ps1`
+- `scripts/build-windows-installer.ps1`
+- `scripts/verify-windows-installer.ps1`
+- `scripts/resolve-dotnet.ps1`
+- `scripts/install-inno-setup.ps1`
 
 ## Nota sobre el catalogo
 
@@ -75,3 +80,4 @@ Consulta:
 - `PUBLISH_AND_INSTALL.md`
 - `../ENVIRONMENT_SETUP.md`
 - `../docs/04-windows-localhost-launcher.md`
+- `../docs/05-packaging-and-publish.md`

@@ -1,0 +1,52 @@
+name: Build Windows Installer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["**"]
+    paths:
+      - '.github/workflows/build-windows-installer.yml'
+      - 'NuGet.Config'
+      - 'labs.config.json'
+      - 'launcher/windows/src/**'
+      - 'scripts/sync-launcher-catalog.js'
+      - 'scripts/verify-localhost.js'
+      - 'windows/installer/**'
+      - 'windows/scripts/**'
+  pull_request:
+    paths:
+      - '.github/workflows/build-windows-installer.yml'
+      - 'NuGet.Config'
+      - 'labs.config.json'
+      - 'launcher/windows/src/**'
+      - 'scripts/sync-launcher-catalog.js'
+      - 'scripts/verify-localhost.js'
+      - 'windows/installer/**'
+      - 'windows/scripts/**'
+
+jobs:
+  build-installer:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build and verify Windows installer
+        shell: powershell
+        run: |
+          powershell -ExecutionPolicy Bypass -File .\windows\scripts\build-windows-installer.ps1
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: unikernel-control-center-installer-win-x64
+          path: artifacts/installer/*.exe
+          if-no-files-found: error

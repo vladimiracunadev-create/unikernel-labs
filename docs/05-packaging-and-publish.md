@@ -20,6 +20,7 @@ En Windows:
 - una distro Linux instalada
 - Node.js si vas a usar el dashboard
 - .NET 8 SDK si vas a compilar el launcher
+- Inno Setup si vas a compilar el instalador de forma manual
 
 En la distro Linux:
 
@@ -64,17 +65,45 @@ y, si corresponde:
 dotnet test .\launcher\windows\src\UnikernelLabs.Launcher.Tests\UnikernelLabs.Launcher.Tests.csproj
 ```
 
-## 5. Publish recomendado
+## 5. Build recomendado del instalador
 
 ```powershell
-dotnet publish .\launcher\windows\src\UnikernelLabs.Launcher\UnikernelLabs.Launcher.csproj `
-  -c Release `
-  -r win-x64 `
-  --self-contained true `
-  /p:PublishSingleFile=true
+powershell -ExecutionPolicy Bypass -File .\windows\scripts\build-windows-installer.ps1
 ```
 
-## 6. Flujo de instalacion sugerido
+Ese comando:
+
+- sincroniza `labs.windows.json`
+- corre `node scripts/verify-localhost.js`
+- corre `dotnet test`
+- publica el launcher self-contained
+- compila `windows/installer/UnikernelControlCenter.iss`
+- instala, abre y desinstala el launcher para verificar el instalador
+
+Artefactos:
+
+```text
+artifacts/publish/win-x64/UnikernelLabs.Launcher.exe
+artifacts/installer/UnikernelControlCenter-1.0.0-win-x64-setup.exe
+```
+
+## 6. Publish portable alternativo
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\windows\scripts\publish-launcher.ps1
+```
+
+## 7. CI de instalador
+
+El repo incluye:
+
+```text
+.github/workflows/build-windows-installer.yml
+```
+
+Ese workflow ejecuta el mismo flujo en `windows-latest` y publica el instalador como artifact de Actions.
+
+## 8. Flujo de instalacion sugerido
 
 1. usuario instala WSL2
 2. usuario instala Ubuntu o Debian
@@ -84,9 +113,20 @@ dotnet publish .\launcher\windows\src\UnikernelLabs.Launcher\UnikernelLabs.Launc
 6. usuario configura distro y ruta Linux del repo
 7. usuario inicia servicios y los verifica por `localhost`
 
-## 7. Que mejorar en una v2
+## 9. Validacion real hecha en este repo
 
-- instalador MSI o similar
+Se valido localmente en Windows:
+
+- `node scripts/verify-localhost.js`: ok
+- `dotnet test`: 25 tests ok
+- `build-windows-installer.ps1`: ok
+- instalacion silenciosa del `.exe`: ok
+- arranque del launcher instalado: ok
+- desinstalacion de verificacion: ok
+
+## 10. Que mejorar en una v2
+
+- MSI firmado o MSIX
 - bootstrap mas automatico para `kraft`
 - deteccion y reparacion de prerequisitos
 - mejor sincronizacion de catalogo en tiempo de ejecucion

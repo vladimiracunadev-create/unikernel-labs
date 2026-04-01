@@ -146,11 +146,13 @@ dotnet test --logger "console;verbosity=normal"
 ### Publicar la app
 
 ```powershell
-dotnet publish .\launcher\windows\src\UnikernelLabs.Launcher\UnikernelLabs.Launcher.csproj `
-  -c Release `
-  -r win-x64 `
-  --self-contained true `
-  /p:PublishSingleFile=true
+powershell -ExecutionPolicy Bypass -File .\windows\scripts\build-windows-installer.ps1
+```
+
+Si solo necesitas el `.exe` portable:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\windows\scripts\publish-launcher.ps1
 ```
 
 ---

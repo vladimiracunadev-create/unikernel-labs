@@ -47,7 +47,29 @@ Verifica:
 Invoke-RestMethod http://127.0.0.1:9091/api/diagnostics | ConvertTo-Json
 ```
 
-## 6. Publicar el launcher
+## 6. Generar el instalador de Windows
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\windows\scripts\build-windows-installer.ps1
+```
+
+Este flujo ejecuta en orden:
+
+- sincronizacion de `labs.windows.json`
+- validaciones localhost
+- pruebas del launcher
+- `dotnet publish`
+- compilacion del instalador con Inno Setup
+- instalacion silenciosa + arranque del launcher + desinstalacion de verificacion
+
+Artefactos esperados:
+
+```text
+artifacts/publish/win-x64/UnikernelLabs.Launcher.exe
+artifacts/installer/UnikernelControlCenter-1.0.0-win-x64-setup.exe
+```
+
+Si solo quieres publicar el ejecutable portable, usa:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\windows\scripts\publish-launcher.ps1
@@ -63,14 +85,23 @@ dotnet publish .\launcher\windows\src\UnikernelLabs.Launcher\UnikernelLabs.Launc
   /p:PublishSingleFile=true
 ```
 
-## 7. Configurar el launcher
+## 7. Instalar o verificar el instalador
 
-Al abrir el ejecutable publicado, configura:
+Para validar un instalador ya generado:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\windows\scripts\verify-windows-installer.ps1 `
+  -InstallerPath .\artifacts\installer\UnikernelControlCenter-1.0.0-win-x64-setup.exe
+```
+
+## 8. Configurar el launcher
+
+Al abrir el launcher instalado o publicado, configura:
 
 - distro WSL2: `Ubuntu`
 - ruta Linux del repo: `/mnt/c/dev/unikernel-labs` o la ruta Linux equivalente
 
-## 8. Validar la superficie localhost
+## 9. Validar la superficie localhost
 
 Desde el dashboard o desde la app Windows, prueba un lab como `nginx-runtime`.
 
@@ -83,7 +114,17 @@ Invoke-RestMethod http://127.0.0.1:9091/api/labs/02/health
 Invoke-WebRequest http://127.0.0.1:8080 -UseBasicParsing
 ```
 
-## 9. Nota de packaging
+## 10. CI del instalador
+
+El repo incluye el workflow:
+
+```text
+.github/workflows/build-windows-installer.yml
+```
+
+Ese workflow compila y verifica el instalador en `windows-latest` y publica el `.exe` como artifact de GitHub Actions.
+
+## 11. Nota de packaging
 
 `labs.windows.json` se genera desde `labs.config.json`.
 

@@ -7,6 +7,7 @@
 
 ![Build](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/dotnet-launcher.yml?branch=main&label=build)
 ![Tests](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/dotnet-launcher.yml?branch=main&label=tests)
+![Installer](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/build-windows-installer.yml?branch=main&label=installer)
 ![Release](https://img.shields.io/github/v/release/vladimiracunadev-create/unikernel-labs?label=release)
 ![Status](https://img.shields.io/badge/status-v1-blue)
 ![Mode](https://img.shields.io/badge/mode-Windows%20%2B%20WSL2%20%2B%20localhost-orange)
@@ -56,6 +57,7 @@ Lo que hoy esta implementado y documentado en este repo:
 - catalogo del launcher generado desde ese catalogo raiz
 - scripts para sincronizar catalogo y verificar el flujo localhost
 - launcher WinForms que consume el mismo set de labs
+- script y workflow para generar un instalador `.exe` de Windows
 - sin despliegue a GitHub Pages
 
 Lo que se valido durante esta iteracion:
@@ -66,6 +68,9 @@ Lo que se valido durante esta iteracion:
 - instalacion de dependencias de runtime (`qemu-system`, `iptables`, etc.)
 - arranque real de `nginx-runtime`
 - respuesta real en `http://localhost:8080`
+- build real del instalador Windows
+- instalacion silenciosa real del instalador
+- arranque real del launcher instalado y desinstalacion de verificacion
 
 ---
 
@@ -216,11 +221,19 @@ La app de escritorio:
 Para publicarla:
 
 ```powershell
-dotnet publish .\launcher\windows\src\UnikernelLabs.Launcher\UnikernelLabs.Launcher.csproj `
-  -c Release `
-  -r win-x64 `
-  --self-contained true `
-  /p:PublishSingleFile=true
+powershell -ExecutionPolicy Bypass -File .\windows\scripts\build-windows-installer.ps1
+```
+
+El flujo genera:
+
+- `artifacts/publish/win-x64/UnikernelLabs.Launcher.exe`
+- `artifacts/installer/UnikernelControlCenter-1.0.0-win-x64-setup.exe`
+
+Tambien puedes verificar solo el instalador ya generado con:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\windows\scripts\verify-windows-installer.ps1 `
+  -InstallerPath .\artifacts\installer\UnikernelControlCenter-1.0.0-win-x64-setup.exe
 ```
 
 Consulta tambien:
@@ -263,13 +276,14 @@ Ese verificador comprueba:
 - puertos estables en `localhost`
 - lectura de logs
 - health checks basicos por protocolo
+- instalador `.exe` para la app Windows
 - una base util para evolucionar hacia una experiencia de escritorio mas madura
 
 ## Lo que esta v1 no promete
 
 - runtime Windows nativo para `kraft`
 - reemplazo completo de Docker Desktop
-- instalador final tipo MSI
+- MSI firmado o auto-actualizacion del launcher
 - soporte uniforme para cualquier lab o cualquier runtime
 
 ---

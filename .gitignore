@@ -19,3 +19,7 @@ reports/*.json
 # Launcher build outputs
 launcher/windows/src/UnikernelLabs.Launcher/bin/
 launcher/windows/src/UnikernelLabs.Launcher/obj/
+launcher/windows/src/UnikernelLabs.Launcher.Tests/bin/
+launcher/windows/src/UnikernelLabs.Launcher.Tests/obj/
+.tools/
+artifacts/

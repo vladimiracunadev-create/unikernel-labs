@@ -158,17 +158,19 @@ Invoke-WebRequest http://127.0.0.1:8080 -UseBasicParsing
 
 ## 8. Launcher Windows
 
-Publica o ejecuta la app:
+Build recomendado del instalador:
 
 ```powershell
-dotnet publish .\launcher\windows\src\UnikernelLabs.Launcher\UnikernelLabs.Launcher.csproj `
-  -c Release `
-  -r win-x64 `
-  --self-contained true `
-  /p:PublishSingleFile=true
+powershell -ExecutionPolicy Bypass -File .\windows\scripts\build-windows-installer.ps1
 ```
 
-Al abrir la app, configura:
+Si solo quieres el ejecutable portable:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\windows\scripts\publish-launcher.ps1
+```
+
+Al abrir la app instalada o publicada, configura:
 
 - `WSL distro`: por ejemplo `Ubuntu`
 - `Linux repo path`: por ejemplo `/mnt/c/dev/unikernel-labs` o `/home/<tu_usuario>/dev/unikernel-labs`
