@@ -1,281 +1,202 @@
 'use strict';
 
-// ── State ─────────────────────────────────────────────────────────────────────
-let _currentLogsId   = null;
-let _statusInterval  = null;
-let _labsCache       = [];
+let _labs   = [];
+let _logsId = null;
 
-// ── API helpers ───────────────────────────────────────────────────────────────
-async function api(path, opts = {}) {
-  const res = await fetch(path, opts);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+// ── API ───────────────────────────────────────────────────────────────────────
+async function get(url)  { const r = await fetch(url);              if (!r.ok) throw new Error(r.status); return r.json(); }
+async function post(url) { const r = await fetch(url,{method:'POST'}); if (!r.ok) throw new Error(r.status); return r.json(); }
 
-// ── Overview ──────────────────────────────────────────────────────────────────
-async function loadOverview() {
-  try {
-    const data = await api('/api/overview');
-    setText('stat-total',   data.total);
-    setText('stat-running', data.running);
-    setText('stat-ready',   data.ready);
-    setText('stat-planned', data.planned);
-  } catch {
-    // server not running — try static config
-    try {
-      const data = await api('/labs.config.json');
-      const total   = data.labs.length;
-      const planned = data.labs.filter(l => l.status === 'planned').length;
-      const ready   = total - planned;
-      setText('stat-total',   total);
-      setText('stat-running', '—');
-      setText('stat-ready',   ready);
-      setText('stat-planned', planned);
-    } catch { /* silent */ }
-  }
-}
+// ── Render ────────────────────────────────────────────────────────────────────
+function buildCard(lab) {
+  const running = !!lab.running;
+  const planned = lab.status === 'planned';
+  const runnable = !!lab.kraftName;
 
-// ── Environment panel ─────────────────────────────────────────────────────────
-async function checkEnv() {
-  // API server
-  try {
-    await api('/api/overview');
-    setEnv('server', 'ok',   'activo :9091');
-    setEnv('kraft',  'ok',   'disponible');
-    setEnv('wsl',    'ok',   'activo');
-  } catch {
-    setEnv('server', 'warn', 'modo estático');
-    setEnv('kraft',  'warn', 'no verificado');
-    setEnv('wsl',    'ok',   'activo');
-  }
-}
+  // Status class for card accent
+  const state = running ? 'running' : planned ? 'planned' : 'stopped';
 
-function setEnv(key, state, label) {
-  const dot = document.getElementById(`dot-${key}`);
-  const val = document.getElementById(`val-${key}`);
-  if (dot) dot.className = `env-dot dot-${state}`;
-  if (val) val.textContent = label;
-}
-
-// ── Labs ──────────────────────────────────────────────────────────────────────
-async function loadLabs() {
-  const container = document.getElementById('labs');
-  try {
-    const labs = await api('/api/labs');
-    _labsCache = labs;
-    renderLabs(labs, container);
-  } catch {
-    // fallback: static file
-    try {
-      const data = await api('/labs.config.json');
-      _labsCache = data.labs.map(l => ({ ...l, running: false }));
-      renderLabs(_labsCache, container);
-    } catch (e) {
-      container.innerHTML = `<div class="error-msg">Error cargando labs: ${e.message}</div>`;
-    }
-  }
-}
-
-function renderLabs(labs, container) {
-  const q = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
-  const filtered = q
-    ? labs.filter(l =>
-        l.name.toLowerCase().includes(q) ||
-        l.description.toLowerCase().includes(q) ||
-        String(l.port || '').includes(q)
-      )
-    : labs;
-
-  container.innerHTML = '';
-
-  if (filtered.length === 0) {
-    container.innerHTML = '<div class="error-msg">No hay labs que coincidan con la búsqueda.</div>';
-    return;
-  }
-
-  for (const lab of filtered) {
-    container.appendChild(buildLabCard(lab));
-  }
-}
-
-function buildLabCard(lab) {
-  const article = document.createElement('article');
-  article.className = `lab lab-${lab.running ? 'running' : (lab.status === 'planned' ? 'planned' : 'stopped')}`;
-  article.dataset.id = lab.id;
-
-  const isRunnable = !!lab.kraftName;
-  const isRunning  = !!lab.running;
-  const isPlanned  = lab.status === 'planned';
-
-  // Status dot + badge
-  const dotClass = isRunning ? 'dot-ok' : isPlanned ? 'dot-planned' : 'dot-idle';
-  const badgeClass = isRunning ? 'badge-running' : isPlanned ? 'badge-planned' : 'badge-stopped';
-  const badgeLabel = isRunning ? 'running' : isPlanned ? 'planned' : 'stopped';
-
-  // Port badge
-  const portBadge = lab.port
-    ? `<span class="port-tag">:${lab.port}</span>`
+  // Port pill
+  const portPill = lab.port
+    ? `<span class="port-pill">:${lab.port}</span>`
     : '';
 
-  // URL link
-  const urlLink = lab.url && !lab.url.startsWith('redis://')
-    ? `<a href="${lab.url}" target="_blank" rel="noreferrer" class="btn-open-url">↗ Abrir</a>`
-    : '';
+  // Health protocol icon
+  const proto = { http:'HTTP', redis:'Redis', tcp:'TCP' }[lab.healthProtocol] || '';
+  const protoPill = proto ? `<span class="proto-pill">${proto}</span>` : '';
+
+  // Running indicator row
+  const indicator = running
+    ? `<div class="running-bar"><span class="pulse-dot"></span> Servicio activo</div>`
+    : planned
+      ? `<div class="planned-bar">Próximamente</div>`
+      : `<div class="stopped-bar">Detenido</div>`;
 
   // Controls
   let controls = '';
-  if (isRunnable) {
+  if (runnable) {
+    const openBtn = lab.url && !lab.url.startsWith('redis://')
+      ? running
+        ? `<button class="btn-card btn-open" data-url="${lab.url}">↗ Abrir</button>`
+        : `<button class="btn-card btn-open btn-open-off" disabled title="Inicia el servicio primero">↗ Abrir</button>`
+      : '';
+
     controls = `
-      <div class="lab-controls">
-        <button class="btn-lab btn-start" data-id="${lab.id}" ${isRunning ? 'disabled' : ''}>▶ Iniciar</button>
-        <button class="btn-lab btn-stop"  data-id="${lab.id}" ${!isRunning ? 'disabled' : ''}>■ Detener</button>
-        <button class="btn-lab btn-logs"  data-id="${lab.id}">≡ Logs</button>
-        ${urlLink}
+      <div class="card-controls">
+        <button class="btn-card btn-start" data-id="${lab.id}" ${running ? 'disabled' : ''}>▶ Iniciar</button>
+        <button class="btn-card btn-stop"  data-id="${lab.id}" ${!running ? 'disabled' : ''}>■ Detener</button>
+        <button class="btn-card btn-logs"  data-id="${lab.id}">≡ Logs</button>
+        ${openBtn}
       </div>`;
   } else {
-    controls = `<div class="lab-controls"><span class="planned-tag">Próximamente</span></div>`;
+    controls = `<div class="card-controls"><span class="soon-label">Sin comandos configurados</span></div>`;
   }
 
-  article.innerHTML = `
-    <div class="lab-header">
-      <div class="lab-header-left">
-        <span class="status-dot ${dotClass}"></span>
-        <span class="lab-id">${lab.id}</span>
-        ${portBadge}
+  return `
+    <article class="lab-card state-${state}" data-id="${lab.id}">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <div class="card-pills">${portPill}${protoPill}</div>
+          <span class="card-id">#${lab.id}</span>
+        </div>
+        <h3 class="card-name">${lab.name}</h3>
+        <p class="card-desc">${lab.description}</p>
+        ${indicator}
+        ${controls}
       </div>
-      <span class="lab-badge ${badgeClass}">${badgeLabel}</span>
-    </div>
-    <h3 class="lab-name">${lab.name}</h3>
-    <p class="lab-desc">${lab.description}</p>
-    ${controls}
-  `;
-
-  return article;
+    </article>`;
 }
 
-// ── Lab actions ───────────────────────────────────────────────────────────────
-async function startLab(id) {
-  setLabBusy(id, true, '▶ Iniciando…');
-  try {
-    await api(`/api/labs/${id}/start`, { method: 'POST' });
-  } catch (e) {
-    console.warn('start error:', e.message);
+function render() {
+  const q    = (document.getElementById('search-input')?.value || '').toLowerCase();
+  const list = q
+    ? _labs.filter(l => l.name.toLowerCase().includes(q) || String(l.port||'').includes(q))
+    : _labs;
+
+  const container = document.getElementById('labs');
+  if (!list.length) {
+    container.innerHTML = '<div class="lab-placeholder">Sin resultados.</div>';
+    return;
   }
-  await refreshAll();
-  setLabBusy(id, false);
+  container.innerHTML = list.map(buildCard).join('');
 }
 
-async function stopLab(id) {
-  setLabBusy(id, true, '■ Deteniendo…');
+// ── Data ──────────────────────────────────────────────────────────────────────
+async function load() {
   try {
-    await api(`/api/labs/${id}/stop`, { method: 'POST' });
-  } catch (e) {
-    console.warn('stop error:', e.message);
+    _labs = await get('/api/labs');
+    setHint('API conectada · auto-refresh 10s', 'ok');
+  } catch {
+    try {
+      const cfg = await get('/labs.config.json');
+      _labs = cfg.labs.map(l => ({ ...l, running: false }));
+      setHint('Modo estático — inicia el servidor para control en vivo', 'warn');
+    } catch {
+      setHint('Error cargando configuración', 'err');
+    }
   }
-  await refreshAll();
-  setLabBusy(id, false);
+  render();
+  await loadStats();
+}
+
+async function loadStats() {
+  try {
+    const d = await get('/api/overview');
+    setText('stat-running', d.running);
+    setText('stat-ready',   d.ready);
+    setText('stat-planned', d.planned);
+  } catch {
+    const running = _labs.filter(l => l.running).length;
+    const planned = _labs.filter(l => l.status === 'planned').length;
+    setText('stat-running', running);
+    setText('stat-ready',   _labs.length - planned);
+    setText('stat-planned', planned);
+  }
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+async function start(id) {
+  setBusy(id, true);
+  try { await post(`/api/labs/${id}/start`); } catch(e) { console.warn(e); }
+  await load();
+}
+
+async function stop(id) {
+  setBusy(id, true);
+  try { await post(`/api/labs/${id}/stop`); } catch(e) { console.warn(e); }
+  await load();
 }
 
 async function stopAll() {
   const btn = document.getElementById('btn-stop-all');
-  if (btn) { btn.disabled = true; btn.textContent = '⏹ Deteniendo…'; }
-  try {
-    await api('/api/workspace/stop-all', { method: 'POST' });
-    await refreshAll();
-  } catch (e) {
-    console.warn('stop-all error:', e.message);
-  }
-  if (btn) { btn.disabled = false; btn.textContent = '⏹ Detener todo'; }
+  if (btn) btn.disabled = true;
+  try { await post('/api/workspace/stop-all'); } catch(e) { console.warn(e); }
+  await load();
+  if (btn) btn.disabled = false;
 }
 
-function setLabBusy(id, busy, label) {
-  const card = document.querySelector(`.lab[data-id="${id}"]`);
-  if (!card) return;
-  card.querySelectorAll('.btn-lab').forEach(b => {
-    b.disabled = busy;
-    if (busy && label && b.classList.contains('btn-start')) b.textContent = label;
-    if (busy && label && b.classList.contains('btn-stop'))  b.textContent = label;
-  });
+function setBusy(id, busy) {
+  document.querySelectorAll(`.lab-card[data-id="${id}"] .btn-card`).forEach(b => b.disabled = busy);
 }
 
-// ── Logs panel ────────────────────────────────────────────────────────────────
+// ── Logs ──────────────────────────────────────────────────────────────────────
 async function showLogs(id) {
-  _currentLogsId = id;
-  const panel   = document.getElementById('logs-panel');
-  const overlay = document.getElementById('logs-overlay');
-  const content = document.getElementById('logs-content');
-  const title   = document.getElementById('logs-title');
-  const lab     = _labsCache.find(l => l.id === id);
-
-  title.textContent = `Logs — ${lab ? lab.name : id}`;
-  content.textContent = 'Cargando…';
-  panel.classList.add('open');
-  overlay.classList.add('open');
-
+  _logsId = id;
+  const lab = _labs.find(l => l.id === id);
+  document.getElementById('logs-title').textContent = `Logs — ${lab?.name ?? id}`;
+  document.getElementById('logs-content').textContent = 'Cargando…';
+  document.getElementById('logs-panel').classList.add('open');
+  document.getElementById('logs-overlay').classList.add('open');
   await fetchLogs(id);
 }
 
 async function fetchLogs(id) {
-  const content = document.getElementById('logs-content');
+  const el = document.getElementById('logs-content');
   try {
-    const data = await api(`/api/labs/${id}/logs`);
-    content.textContent = data.output || '(sin output)';
+    const d = await get(`/api/labs/${id}/logs`);
+    el.textContent = d.output || '(sin output)';
   } catch {
-    content.textContent = 'Error: API no disponible. Usa: kraft logs <nombre>';
+    el.textContent = 'API no disponible. Usa: kraft logs <nombre>';
   }
-  content.scrollTop = content.scrollHeight;
+  el.scrollTop = el.scrollHeight;
 }
 
 function closeLogs() {
-  _currentLogsId = null;
-  document.getElementById('logs-panel')?.classList.remove('open');
-  document.getElementById('logs-overlay')?.classList.remove('open');
-}
-
-// ── Refresh ───────────────────────────────────────────────────────────────────
-async function refreshAll() {
-  await Promise.all([loadOverview(), loadLabs()]);
-  if (_currentLogsId) await fetchLogs(_currentLogsId);
+  _logsId = null;
+  document.getElementById('logs-panel').classList.remove('open');
+  document.getElementById('logs-overlay').classList.remove('open');
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Initial load
-  checkEnv();
-  refreshAll();
+  load();
+  setInterval(load, 10_000);
 
-  // Auto-refresh every 10 s
-  _statusInterval = setInterval(refreshAll, 10_000);
+  document.getElementById('search-input').addEventListener('input', render);
+  document.getElementById('btn-refresh').addEventListener('click', load);
+  document.getElementById('btn-stop-all').addEventListener('click', stopAll);
+  document.getElementById('logs-close').addEventListener('click', closeLogs);
+  document.getElementById('logs-overlay').addEventListener('click', closeLogs);
+  document.getElementById('btn-logs-refresh').addEventListener('click', () => { if (_logsId) fetchLogs(_logsId); });
 
-  // Search
-  document.getElementById('search-input')?.addEventListener('input', () => {
-    renderLabs(_labsCache, document.getElementById('labs'));
-  });
-
-  // Lab control buttons — event delegation
-  document.getElementById('labs')?.addEventListener('click', async e => {
+  document.getElementById('labs').addEventListener('click', async e => {
     const btn = e.target.closest('[data-id]');
+    const url = e.target.closest('[data-url]');
+    if (url) { window.open(url.dataset.url, '_blank'); return; }
     if (!btn) return;
     const id = btn.dataset.id;
-    if (btn.classList.contains('btn-start')) await startLab(id);
-    if (btn.classList.contains('btn-stop'))  await stopLab(id);
+    if (btn.classList.contains('btn-start')) await start(id);
+    if (btn.classList.contains('btn-stop'))  await stop(id);
     if (btn.classList.contains('btn-logs'))  await showLogs(id);
-  });
-
-  // Header buttons
-  document.getElementById('btn-refresh')?.addEventListener('click', refreshAll);
-  document.getElementById('btn-stop-all')?.addEventListener('click', stopAll);
-
-  // Logs panel
-  document.getElementById('logs-close')?.addEventListener('click', closeLogs);
-  document.getElementById('logs-overlay')?.addEventListener('click', closeLogs);
-  document.getElementById('btn-logs-refresh')?.addEventListener('click', () => {
-    if (_currentLogsId) fetchLogs(_currentLogsId);
   });
 });
 
-// ── Util ──────────────────────────────────────────────────────────────────────
-function setText(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value;
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function setText(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
+function setHint(msg, type) {
+  const el = document.getElementById('env-hint');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = `search-hint hint-${type}`;
 }

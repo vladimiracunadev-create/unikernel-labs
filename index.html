@@ -10,129 +10,71 @@
 
   <!-- ── Header ─────────────────────────────────────────────────────────── -->
   <header class="header">
-    <div class="container">
-      <div class="hero-brand">
-        <img src="assets/branding/ucc-logo.png" alt="UCC Logo">
-        <div class="hero-text">
-          <span class="eyebrow">Unikernel Control Center v1</span>
+    <div class="container header-inner">
+      <div class="brand">
+        <img src="assets/branding/ucc-logo.png" alt="UCC">
+        <div>
+          <p class="eyebrow">Unikernel Control Center v1</p>
           <h1>Workspace Console</h1>
-          <p>Suite local para gobernar servicios unikernel desde Windows con backend WSL2 y acceso por localhost.</p>
-        </div>
-        <div class="hero-actions">
-          <button class="btn-header" id="btn-refresh" title="Actualizar estado">⟳ Actualizar</button>
-          <button class="btn-header btn-danger" id="btn-stop-all" title="Detener todos los servicios">⏹ Detener todo</button>
         </div>
       </div>
-
-      <!-- Stats bar -->
-      <div class="stats-bar">
-        <div class="stat-card">
-          <span class="stat-value" id="stat-total">—</span>
-          <span class="stat-label">Labs registrados</span>
+      <div class="header-right">
+        <div class="stats-bar">
+          <div class="stat">
+            <span class="stat-val" id="stat-running">0</span>
+            <span class="stat-lbl">corriendo</span>
+          </div>
+          <div class="stat stat-sep">
+            <span class="stat-val" id="stat-ready">0</span>
+            <span class="stat-lbl">disponibles</span>
+          </div>
+          <div class="stat stat-sep">
+            <span class="stat-val" id="stat-planned">0</span>
+            <span class="stat-lbl">próximamente</span>
+          </div>
         </div>
-        <div class="stat-card stat-ok">
-          <span class="stat-value" id="stat-running">—</span>
-          <span class="stat-label">Corriendo</span>
-        </div>
-        <div class="stat-card stat-info">
-          <span class="stat-value" id="stat-ready">—</span>
-          <span class="stat-label">Disponibles</span>
-        </div>
-        <div class="stat-card stat-muted">
-          <span class="stat-value" id="stat-planned">—</span>
-          <span class="stat-label">Próximamente</span>
+        <div class="header-actions">
+          <button class="btn-hdr" id="btn-refresh">⟳ Actualizar</button>
+          <button class="btn-hdr btn-hdr-danger" id="btn-stop-all">⏹ Detener todo</button>
         </div>
       </div>
     </div>
   </header>
 
   <!-- ── Main ───────────────────────────────────────────────────────────── -->
-  <main class="container main-layout">
+  <main class="container">
 
-    <!-- Panels row -->
-    <section class="panels-row">
-      <article class="panel">
-        <h3>Arquitectura</h3>
-        <div class="arch-flow">
-          <span class="arch-node win">.exe Windows</span>
-          <span class="arch-arrow">→</span>
-          <span class="arch-node wsl">WSL2</span>
-          <span class="arch-arrow">→</span>
-          <span class="arch-node kraft">kraft</span>
-          <span class="arch-arrow">→</span>
-          <span class="arch-node local">localhost</span>
-        </div>
-        <p class="panel-muted">La UX vive arriba. El runtime real sigue abajo, en Linux.</p>
-      </article>
-
-      <article class="panel">
-        <h3>Inicio rápido</h3>
-        <div class="code">make doctor</div>
-        <div class="code">make run-nginx</div>
-        <div class="code">make run-redis</div>
-        <p class="panel-muted">O usa el launcher Windows para control visual.</p>
-      </article>
-
-      <article class="panel" id="panel-env">
-        <h3>Entorno</h3>
-        <div class="env-row">
-          <span class="env-dot" id="dot-server"></span>
-          <span class="env-label">API Server</span>
-          <span class="env-value" id="val-server">verificando…</span>
-        </div>
-        <div class="env-row">
-          <span class="env-dot" id="dot-kraft"></span>
-          <span class="env-label">kraft</span>
-          <span class="env-value" id="val-kraft">verificando…</span>
-        </div>
-        <div class="env-row">
-          <span class="env-dot" id="dot-wsl"></span>
-          <span class="env-label">WSL2</span>
-          <span class="env-value" id="val-wsl">activo</span>
-        </div>
-      </article>
-    </section>
-
-    <!-- Search bar -->
-    <div class="search-bar">
-      <input
-        type="search"
-        id="search-input"
-        placeholder="Buscar lab por nombre, descripción o puerto…"
-        autocomplete="off"
-      >
+    <!-- Search -->
+    <div class="search-wrap">
+      <input id="search-input" type="search" placeholder="Buscar lab por nombre o puerto…" autocomplete="off">
+      <span class="search-hint" id="env-hint">verificando entorno…</span>
     </div>
 
-    <!-- Labs grid -->
-    <section class="section-title-wrap">
-      <h2 class="section-title">Labs disponibles</h2>
-    </section>
-
+    <!-- Labs -->
     <div class="labs" id="labs">
-      <!-- populated by dashboard.js -->
-      <div class="loading-msg">Cargando labs…</div>
+      <div class="lab-placeholder">Cargando servicios…</div>
     </div>
 
   </main>
 
   <!-- ── Logs panel ──────────────────────────────────────────────────────── -->
+  <div class="logs-overlay" id="logs-overlay"></div>
   <aside class="logs-panel" id="logs-panel">
-    <div class="logs-header">
+    <div class="logs-hdr">
       <span id="logs-title">Logs</span>
-      <div class="logs-header-actions">
-        <button id="btn-logs-refresh" class="btn-logs-ctrl" title="Refrescar logs">⟳</button>
-        <button id="logs-close" class="btn-logs-ctrl" title="Cerrar">✕</button>
+      <div>
+        <button class="btn-icon" id="btn-logs-refresh">⟳</button>
+        <button class="btn-icon" id="logs-close">✕</button>
       </div>
     </div>
-    <pre class="logs-content" id="logs-content">(sin output)</pre>
+    <pre class="logs-body" id="logs-content">(sin output)</pre>
   </aside>
-  <div class="logs-overlay" id="logs-overlay"></div>
 
   <!-- ── Footer ──────────────────────────────────────────────────────────── -->
   <footer class="footer">
-    <div class="container">
-      <span>Unikernel Control Center v1 — <a href="https://github.com/vladimiracunadev-create/unikernel-labs" target="_blank" rel="noreferrer">GitHub</a></span>
-      <span class="footer-right">Windows + WSL2 + localhost</span>
+    <div class="container footer-inner">
+      <span>Unikernel Control Center v1</span>
+      <span>Windows + WSL2 + localhost · <a href="https://github.com/vladimiracunadev-create/unikernel-labs" target="_blank" rel="noreferrer">GitHub ↗</a></span>
     </div>
   </footer>
 
