@@ -39,6 +39,15 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Ensure Inno Setup is available
+        shell: powershell
+        run: |
+          if (Get-Command choco -ErrorAction SilentlyContinue) {
+            choco install innosetup --no-progress -y
+          } else {
+            Write-Host "Chocolatey no esta disponible. El script usara el fallback local."
+          }
+
       - name: Build and verify Windows installer
         shell: powershell
         run: |
