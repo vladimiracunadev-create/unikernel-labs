@@ -1,43 +1,75 @@
 # Launcher
 
-La carpeta `launcher/` contiene la cara de producto de **Unikernel Control Center v1**.
+La carpeta `launcher/` contiene la superficie desktop de **Unikernel Control Center v1**.
 
-## Qué incluye ahora
+## Que es hoy
 
-- branding inicial del producto
-- icono y logo para la aplicación Windows
-- cabecera visual tipo producto
-- menú superior con acciones principales
-- barra de estado
-- **barra lateral con iconos**
-- **autodetección al iniciar, selector visual de distros WSL y detección de la ruta Linux del repo**
-- detalle del servicio seleccionado
-- **grilla de servicios con estado por colores y health checks ricos para HTTP, Redis y TCP**
-- persistencia simple de la configuración local
+Es una app WinForms .NET 8 que actua como panel de control Windows sobre un backend WSL2.
 
-## Objetivo
+No ejecuta unikernels como procesos Windows nativos. Ejecuta `wsl.exe`, llama a `kraft` dentro de Linux y opera sobre servicios expuestos en `localhost`.
 
-Entregar una experiencia más seria y demostrable para Windows sin ocultar que el backend real sigue viviendo en **WSL2 + kraft**.
+## Capacidades actuales
 
-## Subárbol principal
+- autodeteccion de distro WSL
+- deteccion de ruta Linux del repo
+- grilla de servicios con estado visual
+- health checks HTTP, Redis y TCP
+- consola integrada para salida operativa
+- `Start`, `Stop`, `Logs`, `Status`, `Health` y `Open`
+- persistencia de configuracion local
+
+## Relacion con el dashboard localhost
+
+El launcher y el dashboard comparten el mismo modelo operativo:
+
+- mismo backend WSL2
+- mismos puertos `localhost`
+- mismo catalogo de labs a partir de `labs.config.json`
+
+El archivo que usa la app:
+
+```text
+windows/src/UnikernelLabs.Launcher/labs.windows.json
+```
+
+se genera desde:
+
+```text
+../../labs.config.json
+```
+
+con:
+
+```powershell
+# desde la raiz del repo
+node scripts/sync-launcher-catalog.js
+```
+
+## Subarbol principal
 
 ```text
 windows/src/UnikernelLabs.Launcher
 ```
 
-## Qué representa esta v1
+## Flujo recomendado
 
-Sí representa:
+1. dejar sano el dashboard localhost y el runtime WSL
+2. sincronizar el catalogo del launcher
+3. compilar o publicar la app
+4. configurar distro y path Linux
+5. probar `Start / Health / Open` sobre `nginx-runtime`
 
+## Lo que representa esta v1
+
+Si representa:
+
+- una experiencia Windows creible
 - control por servicio
-- apertura de endpoints `localhost`
-- verificación rápida de salud
-- validación básica del entorno
-- narrativa de producto consistente
+- puertos `localhost` previsibles
+- una base desktop reutilizable
 
-Todavía no representa:
+Todavia no representa:
 
-- desktop completo con settings avanzados
 - instalador final
-- administración profunda de imágenes, redes o volúmenes
-- reemplazo funcional total de Docker Desktop
+- administracion avanzada de imagenes o redes
+- reemplazo funcional completo de Docker Desktop

@@ -1,20 +1,15 @@
 # Packaging and publish
 
-Esta guía aterriza cómo transformar **Unikernel Control Center v1** en una entrega Windows más presentable sin prometer algo que técnicamente no es.
+Esta guia aterriza como publicar **Unikernel Control Center v1** sin ocultar su arquitectura real.
 
-## 1. Qué publicas realmente
+## 1. Que publicas
 
-Publicas una **aplicación Windows** que actúa como panel de control.
+Publicas una app Windows que actua como panel de control.
 
-No publicas:
-
-- un runtime nativo de `kraft` para Windows
-- unikernels corriendo como procesos Windows normales
-
-La cadena correcta es:
+La cadena real es:
 
 ```text
-.exe Windows -> WSL2 -> distro Linux -> kraft -> localhost
+.exe Windows -> WSL2 -> distro Linux -> kraft -> qemu -> localhost
 ```
 
 ## 2. Precondiciones
@@ -22,20 +17,54 @@ La cadena correcta es:
 En Windows:
 
 - WSL2 habilitado
-- virtualización disponible
-- una distro Linux instalada (Debian o Ubuntu)
-- .NET 8 SDK si vas a compilar localmente
+- una distro Linux instalada
+- Node.js si vas a usar el dashboard
+- .NET 8 SDK si vas a compilar el launcher
 
 En la distro Linux:
 
 - `kraft`
 - `qemu-system`
+- `iptables`
 - acceso a `/dev/kvm`
-- repo clonado en una ruta Linux estable
+- repo accesible desde la ruta Linux configurada
 
-## 3. Publish recomendado
+## 3. Catalogo a empaquetar
 
-Desde PowerShell en Windows:
+El launcher incluye:
+
+- `labs.windows.json`
+- `logo.png`
+- `app.ico`
+
+Pero recuerda:
+
+- `labs.windows.json` se genera desde `labs.config.json`
+- no conviene editarlo a mano antes de publicar
+
+Sincroniza primero:
+
+```powershell
+# desde la raiz del repo
+node scripts/sync-launcher-catalog.js
+```
+
+## 4. Verificaciones previas
+
+Antes de publicar, ejecuta:
+
+```powershell
+# desde la raiz del repo
+node scripts/verify-localhost.js
+```
+
+y, si corresponde:
+
+```powershell
+dotnet test .\launcher\windows\src\UnikernelLabs.Launcher.Tests\UnikernelLabs.Launcher.Tests.csproj
+```
+
+## 5. Publish recomendado
 
 ```powershell
 dotnet publish .\launcher\windows\src\UnikernelLabs.Launcher\UnikernelLabs.Launcher.csproj `
@@ -45,47 +74,20 @@ dotnet publish .\launcher\windows\src\UnikernelLabs.Launcher\UnikernelLabs.Launc
   /p:PublishSingleFile=true
 ```
 
-Salida esperada:
-
-```text
-launcher/windows/src/UnikernelLabs.Launcher/bin/Release/net8.0-windows/win-x64/publish
-```
-
-## 4. Qué empaquetar en una entrega v1
-
-Mínimo:
-
-- `UnikernelLabs.Launcher.exe`
-- `labs.windows.json`
-- `logo.png`
-- `app.ico`
-- `README.md`
-- `windows/PUBLISH_AND_INSTALL.md`
-
-Opcional:
-
-- acceso directo
-- script bootstrap para validar WSL2
-- script de doctor de entorno
-
-## 5. Instalación sugerida
-
-Una v1 honesta puede instalarse así:
+## 6. Flujo de instalacion sugerido
 
 1. usuario instala WSL2
-2. usuario instala Debian/Ubuntu
-3. usuario ejecuta `install-runtime-prereqs.ps1`
-4. usuario clona `unikernel-labs` dentro de WSL2
-5. usuario abre el launcher y configura:
-   - distro
-   - ruta Linux del repo
-6. usuario inicia servicios desde el launcher
+2. usuario instala Ubuntu o Debian
+3. usuario instala dependencias base y `kraft`
+4. usuario valida el dashboard localhost
+5. usuario abre el launcher
+6. usuario configura distro y ruta Linux del repo
+7. usuario inicia servicios y los verifica por `localhost`
 
-## 6. Qué mejorar si luego quieres una v2
+## 7. Que mejorar en una v2
 
-- empaquetador MSI o similar
-- detección automática de WSL2 y distro
-- autocompletado de ruta Linux
-- health checks HTTP más ricos
-- mejores logs de arranque y fallos
-- actualización del catálogo sin recompilar
+- instalador MSI o similar
+- bootstrap mas automatico para `kraft`
+- deteccion y reparacion de prerequisitos
+- mejor sincronizacion de catalogo en tiempo de ejecucion
+- validacion guiada desde la propia app

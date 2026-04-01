@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test": "node ../scripts/verify-localhost.js",
+    "sync:launcher-catalog": "node ../scripts/sync-launcher-catalog.js"
   },
   "engines": {
     "node": ">=18"

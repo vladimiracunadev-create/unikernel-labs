@@ -1,23 +1,31 @@
 SHELL := /bin/bash
 
-.PHONY: help serve doctor run-hello run-nginx run-python run-node run-redis stop-hello stop-nginx stop-python stop-node stop-redis status logs-nginx logs-python logs-node logs-redis benchmark-nginx
+.PHONY: help serve test-dashboard sync-launcher-catalog doctor run-hello run-nginx run-python run-node run-redis stop-hello stop-nginx stop-python stop-node stop-redis status logs-nginx logs-python logs-node logs-redis benchmark-nginx
 
 help:
 	@echo "Targets disponibles:"
-	@echo "  make serve         # servidor Node.js + REST API en 9091"
-	@echo "  make doctor        # diagnóstico rápido del host"
-	@echo "  make run-hello     # hello world (validación)"
-	@echo "  make run-nginx     # nginx unikernel en 8080"
-	@echo "  make run-python    # python unikernel en 8081"
-	@echo "  make run-node      # node unikernel en 8082"
-	@echo "  make run-redis     # redis unikernel en 6379"
-	@echo "  make status        # lista instancias"
-	@echo "  make stop-*        # detiene instancia"
-	@echo "  make logs-*        # muestra logs"
+	@echo "  make serve                # servidor Node.js + REST API en 9091"
+	@echo "  make test-dashboard       # tests del dashboard local + sync del launcher"
+	@echo "  make sync-launcher-catalog"
+	@echo "  make doctor               # diagnostico rapido del host"
+	@echo "  make run-hello            # hello world (validacion)"
+	@echo "  make run-nginx            # nginx unikernel en 8080"
+	@echo "  make run-python           # python unikernel en 8081"
+	@echo "  make run-node             # node unikernel en 8082"
+	@echo "  make run-redis            # redis unikernel en 6379"
+	@echo "  make status               # lista instancias"
+	@echo "  make stop-*               # detiene instancia"
+	@echo "  make logs-*               # muestra logs"
 	@echo "  make benchmark-nginx"
 
 serve:
 	@node dashboard-server/server.js
+
+test-dashboard:
+	@node scripts/verify-localhost.js
+
+sync-launcher-catalog:
+	@node scripts/sync-launcher-catalog.js
 
 doctor:
 	@bash scripts/doctor.sh

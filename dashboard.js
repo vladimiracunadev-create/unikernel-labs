@@ -1,21 +1,28 @@
 'use strict';
 
-let _labs   = [];
+let _labs = [];
 let _logsId = null;
-let _diag   = null;
+let _diag = null;
 
-// ── API ───────────────────────────────────────────────────────────────────────
 async function get(url) {
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.json();
-}
-async function post(url) {
-  const r = await fetch(url, { method: 'POST' });
-  return r.json(); // don't throw — always show output
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+  return response.json();
 }
 
-// ── Diagnostics ───────────────────────────────────────────────────────────────
+async function post(url) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'X-UCC-Request': '1',
+    },
+  });
+
+  return response.json();
+}
+
 async function loadDiagnostics() {
   try {
     _diag = await get('/api/diagnostics');
@@ -23,191 +30,230 @@ async function loadDiagnostics() {
     setHint(
       _diag.kraft.ok
         ? `kraft ${_diag.kraft.detail} · WSL: ${_diag.distro}`
-        : `⚠ kraft no instalado en WSL (${_diag.distro || 'sin distro'})`,
+        : `kraft no instalado en WSL (${_diag.distro || 'sin distro'})`,
       _diag.kraft.ok ? 'ok' : 'warn'
     );
   } catch {
-    setHint('Modo estático — servidor no disponible', 'warn');
+    setHint('Modo estatico - servidor no disponible', 'warn');
   }
 }
 
-function renderDiag(d) {
-  const el = document.getElementById('diag-panel');
-  if (!el) return;
-  el.innerHTML = `
+function renderDiag(diagnostics) {
+  const element = document.getElementById('diag-panel');
+  if (!element) {
+    return;
+  }
+
+  const distro = escapeHtml(diagnostics.distro || 'no detectado');
+  const kraftDetail = escapeHtml(diagnostics.kraft.ok ? diagnostics.kraft.detail : 'no instalado');
+
+  element.innerHTML = `
     <div class="diag-row">
-      <span class="diag-dot ${d.wsl.ok ? 'dot-ok' : 'dot-warn'}"></span>
+      <span class="diag-dot ${diagnostics.wsl.ok ? 'dot-ok' : 'dot-warn'}"></span>
       <span>WSL2</span>
-      <span class="diag-val">${d.distro || 'no detectado'}</span>
+      <span class="diag-val">${distro}</span>
     </div>
     <div class="diag-row">
-      <span class="diag-dot ${d.kraft.ok ? 'dot-ok' : 'dot-err'}"></span>
+      <span class="diag-dot ${diagnostics.kraft.ok ? 'dot-ok' : 'dot-err'}"></span>
       <span>kraft</span>
-      <span class="diag-val">${d.kraft.ok ? d.kraft.detail : 'no instalado'}</span>
+      <span class="diag-val">${kraftDetail}</span>
     </div>
     <div class="diag-row">
       <span class="diag-dot dot-ok"></span>
       <span>API</span>
       <span class="diag-val">:9091 activa</span>
     </div>
-    ${!d.kraft.ok ? `<div class="diag-warn">Instala kraft en WSL: <code>curl -sSfL get.kraftkit.sh | sh</code></div>` : ''}
+    ${!diagnostics.kraft.ok ? '<div class="diag-warn">Instala kraft en WSL: <code>curl -sSfL get.kraftkit.sh | sh</code></div>' : ''}
   `;
 }
 
-// ── Stats ─────────────────────────────────────────────────────────────────────
 async function loadStats() {
   try {
-    const d = await get('/api/overview');
-    setText('stat-running', d.running);
-    setText('stat-ready',   d.ready);
-    setText('stat-planned', d.planned);
+    const stats = await get('/api/overview');
+    setText('stat-running', stats.running);
+    setText('stat-ready', stats.ready);
+    setText('stat-planned', stats.planned);
   } catch {
-    const running = _labs.filter(l => l.running).length;
-    const planned = _labs.filter(l => l.status === 'planned').length;
+    const running = _labs.filter(lab => lab.running).length;
+    const planned = _labs.filter(lab => lab.status === 'planned').length;
     setText('stat-running', running);
-    setText('stat-ready',   _labs.length - planned);
+    setText('stat-ready', _labs.length - planned);
     setText('stat-planned', planned);
   }
 }
 
-// ── Labs ──────────────────────────────────────────────────────────────────────
 async function loadLabs() {
   try {
     _labs = await get('/api/labs');
   } catch {
     try {
-      const cfg = await get('/labs.config.json');
-      _labs = cfg.labs.map(l => ({ ...l, running: false }));
-    } catch { return; }
+      const config = await get('/labs.config.json');
+      _labs = config.labs.map(lab => ({ ...lab, running: false }));
+    } catch {
+      return;
+    }
   }
+
   render();
 }
 
 function render() {
-  const q         = (document.getElementById('search-input')?.value || '').toLowerCase();
+  const query = (document.getElementById('search-input')?.value || '').toLowerCase();
   const container = document.getElementById('labs');
-  const filtered  = q ? _labs.filter(l =>
-    l.name.toLowerCase().includes(q) || String(l.port || '').includes(q)
-  ) : _labs;
+  if (!container) {
+    return;
+  }
+
+  const filtered = query
+    ? _labs.filter(lab =>
+      lab.name.toLowerCase().includes(query) || String(lab.port || '').includes(query)
+    )
+    : _labs;
 
   if (!filtered.length) {
     container.innerHTML = '<div class="lab-placeholder">Sin resultados.</div>';
     return;
   }
+
   container.innerHTML = filtered.map(buildCard).join('');
 }
 
 function buildCard(lab) {
-  const running  = !!lab.running;
-  const planned  = lab.status === 'planned';
-  const runnable = !!lab.kraftName;
-  const state    = running ? 'running' : planned ? 'planned' : 'stopped';
+  const running = Boolean(lab.running);
+  const planned = lab.status === 'planned';
+  const runnable = Boolean(lab.kraftName);
+  const state = running ? 'running' : planned ? 'planned' : 'stopped';
 
-  const portPill  = lab.port ? `<span class="port-pill">:${lab.port}</span>` : '';
+  const safeId = escapeHtml(lab.id || '');
+  const safeName = escapeHtml(lab.name || '');
+  const safeDescription = escapeHtml(lab.description || '');
+  const safeUrl = escapeHtml(lab.url || '');
+
+  const portPill = lab.port ? `<span class="port-pill">:${lab.port}</span>` : '';
   const protoPill = lab.healthProtocol
-    ? `<span class="proto-pill">${lab.healthProtocol.toUpperCase()}</span>` : '';
+    ? `<span class="proto-pill">${escapeHtml(String(lab.healthProtocol).toUpperCase())}</span>`
+    : '';
 
   const statusBar = running
     ? `<div class="status-bar bar-running"><span class="pulse-dot"></span>Servicio activo en localhost:${lab.port}</div>`
     : planned
-      ? `<div class="status-bar bar-planned">Próximamente</div>`
-      : `<div class="status-bar bar-stopped">Detenido</div>`;
+      ? '<div class="status-bar bar-planned">Proximamente</div>'
+      : '<div class="status-bar bar-stopped">Detenido</div>';
 
   let controls = '';
   if (runnable) {
     const canOpen = lab.url && !lab.url.startsWith('redis://');
-    const openBtn = canOpen
+    const openButton = canOpen
       ? running
-        ? `<button class="btn-card btn-open" data-url="${lab.url}">↗ Abrir</button>`
-        : `<button class="btn-card btn-open btn-disabled" disabled title="Inicia primero el servicio">↗ Abrir</button>`
+        ? `<button class="btn-card btn-open" data-url="${safeUrl}">Abrir</button>`
+        : '<button class="btn-card btn-open btn-disabled" disabled title="Inicia primero el servicio">Abrir</button>'
       : '';
+
     controls = `
       <div class="card-controls">
-        <button class="btn-card btn-start" data-id="${lab.id}" ${running ? 'disabled' : ''}>▶ Iniciar</button>
-        <button class="btn-card btn-stop"  data-id="${lab.id}" ${!running ? 'disabled' : ''}>■ Detener</button>
-        <button class="btn-card btn-logs"  data-id="${lab.id}">≡ Logs</button>
-        ${openBtn}
-      </div>`;
+        <button class="btn-card btn-start" data-id="${safeId}" ${running ? 'disabled' : ''}>Iniciar</button>
+        <button class="btn-card btn-stop" data-id="${safeId}" ${!running ? 'disabled' : ''}>Detener</button>
+        <button class="btn-card btn-logs" data-id="${safeId}">Logs</button>
+        ${openButton}
+      </div>
+    `;
   } else {
-    controls = `<div class="card-controls"><span class="soon-label">Sin comandos</span></div>`;
+    controls = '<div class="card-controls"><span class="soon-label">Sin comandos</span></div>';
   }
 
   return `
-    <article class="lab-card state-${state}" data-id="${lab.id}">
+    <article class="lab-card state-${state}" data-id="${safeId}">
       <div class="card-accent"></div>
       <div class="card-body">
         <div class="card-top">
           <div class="card-pills">${portPill}${protoPill}</div>
-          <span class="card-id">#${lab.id}</span>
+          <span class="card-id">#${safeId}</span>
         </div>
-        <h3 class="card-name">${lab.name}</h3>
-        <p class="card-desc">${lab.description}</p>
+        <h3 class="card-name">${safeName}</h3>
+        <p class="card-desc">${safeDescription}</p>
         ${statusBar}
         ${controls}
       </div>
-    </article>`;
+    </article>
+  `;
 }
 
-// ── Actions ───────────────────────────────────────────────────────────────────
 async function startLab(id) {
   setBusy(id, true);
-  openLogsPanel(id, 'Iniciando…');
-  const r = await post(`/api/labs/${id}/start`);
-  appendLog(r?.output || '(sin respuesta)');
+  openLogsPanel(id, 'Iniciando...');
+  const result = await post(`/api/labs/${id}/start`);
+  appendLog(result?.output || result?.error || '(sin respuesta)');
   await refresh();
   setBusy(id, false);
 }
 
 async function stopLab(id) {
   setBusy(id, true);
-  openLogsPanel(id, 'Deteniendo…');
-  const r = await post(`/api/labs/${id}/stop`);
-  appendLog(r?.output || '(sin respuesta)');
+  openLogsPanel(id, 'Deteniendo...');
+  const result = await post(`/api/labs/${id}/stop`);
+  appendLog(result?.output || result?.error || '(sin respuesta)');
   await refresh();
   setBusy(id, false);
 }
 
 async function stopAll() {
-  const btn = document.getElementById('btn-stop-all');
-  if (btn) btn.disabled = true;
-  const r = await post('/api/workspace/stop-all');
+  const button = document.getElementById('btn-stop-all');
+  if (button) {
+    button.disabled = true;
+  }
+
+  await post('/api/workspace/stop-all');
   await refresh();
-  if (btn) btn.disabled = false;
+
+  if (button) {
+    button.disabled = false;
+  }
 }
 
 function setBusy(id, busy) {
-  document.querySelectorAll(`.lab-card[data-id="${id}"] .btn-card`).forEach(b => b.disabled = busy);
+  document
+    .querySelectorAll(`.lab-card[data-id="${id}"] .btn-card`)
+    .forEach(button => { button.disabled = busy; });
 }
 
-// ── Logs ──────────────────────────────────────────────────────────────────────
 function openLogsPanel(id, initialText) {
   _logsId = id;
-  const lab = _labs.find(l => l.id === id);
-  document.getElementById('logs-title').textContent = `Logs — ${lab?.name ?? id}`;
-  document.getElementById('logs-content').textContent = initialText || 'Cargando…';
+  const lab = _labs.find(item => item.id === id);
+  document.getElementById('logs-title').textContent = `Logs - ${lab?.name ?? id}`;
+  document.getElementById('logs-content').textContent = initialText || 'Cargando...';
   document.getElementById('logs-panel').classList.add('open');
   document.getElementById('logs-overlay').classList.add('open');
 }
 
 function appendLog(text) {
-  const el = document.getElementById('logs-content');
-  if (el.textContent === 'Cargando…' || el.textContent === 'Iniciando…' || el.textContent === 'Deteniendo…') {
-    el.textContent = text;
-  } else {
-    el.textContent += '\n' + text;
+  const element = document.getElementById('logs-content');
+  if (!element) {
+    return;
   }
-  el.scrollTop = el.scrollHeight;
+
+  if (['Cargando...', 'Iniciando...', 'Deteniendo...'].includes(element.textContent)) {
+    element.textContent = text;
+  } else {
+    element.textContent += `\n${text}`;
+  }
+
+  element.scrollTop = element.scrollHeight;
 }
 
 async function fetchLogs(id) {
-  const el = document.getElementById('logs-content');
-  try {
-    const d = await get(`/api/labs/${id}/logs`);
-    el.textContent = d.output || '(sin output)';
-  } catch {
-    el.textContent = 'API no disponible';
+  const element = document.getElementById('logs-content');
+  if (!element) {
+    return;
   }
-  el.scrollTop = el.scrollHeight;
+
+  try {
+    const data = await get(`/api/labs/${id}/logs`);
+    element.textContent = data.output || '(sin output)';
+  } catch {
+    element.textContent = 'API no disponible';
+  }
+
+  element.scrollTop = element.scrollHeight;
 }
 
 function closeLogs() {
@@ -216,42 +262,80 @@ function closeLogs() {
   document.getElementById('logs-overlay').classList.remove('open');
 }
 
-// ── Refresh ───────────────────────────────────────────────────────────────────
 async function refresh() {
   await Promise.all([loadLabs(), loadStats()]);
-  if (_logsId) await fetchLogs(_logsId);
+  if (_logsId) {
+    await fetchLogs(_logsId);
+  }
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   loadDiagnostics();
   refresh();
   setInterval(refresh, 10_000);
 
   document.getElementById('search-input').addEventListener('input', render);
-  document.getElementById('btn-refresh').addEventListener('click', () => { loadDiagnostics(); refresh(); });
+  document.getElementById('btn-refresh').addEventListener('click', () => {
+    loadDiagnostics();
+    refresh();
+  });
   document.getElementById('btn-stop-all').addEventListener('click', stopAll);
   document.getElementById('logs-close').addEventListener('click', closeLogs);
   document.getElementById('logs-overlay').addEventListener('click', closeLogs);
-  document.getElementById('btn-logs-refresh').addEventListener('click', () => { if (_logsId) fetchLogs(_logsId); });
+  document.getElementById('btn-logs-refresh').addEventListener('click', () => {
+    if (_logsId) {
+      fetchLogs(_logsId);
+    }
+  });
 
-  document.getElementById('labs').addEventListener('click', async e => {
-    const url = e.target.closest('[data-url]');
-    if (url) { window.open(url.dataset.url, '_blank'); return; }
-    const btn = e.target.closest('[data-id]');
-    if (!btn) return;
-    const id = btn.dataset.id;
-    if (btn.classList.contains('btn-start')) await startLab(id);
-    if (btn.classList.contains('btn-stop'))  await stopLab(id);
-    if (btn.classList.contains('btn-logs'))  { openLogsPanel(id); await fetchLogs(id); }
+  document.getElementById('labs').addEventListener('click', async event => {
+    const urlButton = event.target.closest('[data-url]');
+    if (urlButton) {
+      window.open(urlButton.dataset.url, '_blank');
+      return;
+    }
+
+    const actionButton = event.target.closest('[data-id]');
+    if (!actionButton) {
+      return;
+    }
+
+    const { id } = actionButton.dataset;
+    if (actionButton.classList.contains('btn-start')) {
+      await startLab(id);
+    }
+    if (actionButton.classList.contains('btn-stop')) {
+      await stopLab(id);
+    }
+    if (actionButton.classList.contains('btn-logs')) {
+      openLogsPanel(id);
+      await fetchLogs(id);
+    }
   });
 });
 
-// ── Utils ─────────────────────────────────────────────────────────────────────
-function setText(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
-function setHint(msg, type) {
-  const el = document.getElementById('env-hint');
-  if (!el) return;
-  el.textContent = msg;
-  el.className = `search-hint hint-${type}`;
+function setText(id, value) {
+  const element = document.getElementById(id);
+  if (element) {
+    element.textContent = value;
+  }
+}
+
+function setHint(message, type) {
+  const element = document.getElementById('env-hint');
+  if (!element) {
+    return;
+  }
+
+  element.textContent = message;
+  element.className = `search-hint hint-${type}`;
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

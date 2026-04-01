@@ -1,34 +1,42 @@
 # Windows
 
-Este directorio define la experiencia **Windows + WSL2 + localhost** de **Unikernel Control Center v1**.
+Este directorio documenta la capa Windows de **Unikernel Control Center v1**.
 
-## Rol de Windows en la arquitectura
+## Rol real de Windows
 
-Windows no actúa como runtime nativo de `kraft`.
+Windows no es el runtime de los unikernels.
 
-Su papel en esta versión es:
+Windows aporta:
 
-- shell de entrada
-- automatización PowerShell
-- compilación/publicación del launcher
+- dashboard local en Node.js
+- app de escritorio WinForms
+- automatizacion PowerShell
 - apertura de `localhost`
-- capa UX del producto
+- publicacion del `.exe`
 
-## Qué trae la iteración actual
+El runtime real sigue estando en:
 
-- scripts de operación para Windows
-- launcher WinForms con icono y branding
-- menú superior, barra de estado y consola operacional
-- **barra lateral con iconos**
-- **autodetección al iniciar, selector visual de distro WSL y ruta Linux**
-- **grilla de servicios con estado por colores y health checks ricos para HTTP, Redis y TCP**
-- configuración guardada en `%LOCALAPPDATA%/UnikernelControlCenter/settings.json`
+- WSL2
+- Ubuntu o Debian
+- `kraft`
+- QEMU/KVM
+- `iptables`
 
-## Contenido
+## Flujo recomendado hoy
+
+1. preparar WSL2
+2. instalar dependencias base con `windows/scripts/install-runtime-prereqs.ps1`
+3. instalar `kraft` dentro de WSL con `scripts/install-kraft-wsl.sh`
+4. validar el entorno con `doctor-windows.ps1` o `scripts/doctor.sh`
+5. levantar el dashboard local en `http://localhost:9091`
+6. usar el launcher como superficie desktop sobre el mismo backend
+
+## Scripts principales
 
 - `scripts/install-wsl-debian.ps1`
 - `scripts/install-runtime-prereqs.ps1`
 - `scripts/doctor-windows.ps1`
+- `scripts/detect-wsl-context.ps1`
 - `scripts/start-lab.ps1`
 - `scripts/stop-lab.ps1`
 - `scripts/logs-lab.ps1`
@@ -36,25 +44,32 @@ Su papel en esta versión es:
 - `scripts/health-lab.ps1`
 - `scripts/open-lab.ps1`
 - `scripts/publish-launcher.ps1`
-- `scripts/detect-wsl-context.ps1`
 
-## Launcher
+## Nota sobre el catalogo
 
-El launcher real está en:
+La fuente de verdad del catalogo esta en:
 
 ```text
-../launcher/windows/src/UnikernelLabs.Launcher
+../labs.config.json
 ```
 
-## Flujo sugerido
+El launcher usa una copia generada en:
 
-1. validar WSL2 y virtualización
-2. instalar `kraft` dentro de Debian/Ubuntu
-3. clonar el repo en Linux
-4. ejecutar `make doctor`
-5. compilar o publicar el launcher Windows
-6. iniciar servicios, validar health y abrir `localhost`
+```text
+../launcher/windows/src/UnikernelLabs.Launcher/labs.windows.json
+```
 
-## Guía rápida
+Sincronizala con:
 
-Revisa `PUBLISH_AND_INSTALL.md` para el flujo de publicación e instalación.
+```powershell
+# desde la raiz del repo
+node scripts/sync-launcher-catalog.js
+```
+
+## Guia rapida
+
+Consulta:
+
+- `PUBLISH_AND_INSTALL.md`
+- `../ENVIRONMENT_SETUP.md`
+- `../docs/04-windows-localhost-launcher.md`

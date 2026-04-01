@@ -1,0 +1,41 @@
+name: dashboard-localhost
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - 'dashboard-server/**'
+      - 'dashboard.js'
+      - 'index.html'
+      - 'dashboard.css'
+      - 'labs.config.json'
+      - 'launcher/windows/src/UnikernelLabs.Launcher/labs.windows.json'
+      - 'scripts/sync-launcher-catalog.js'
+      - 'scripts/sync-launcher-catalog.test.js'
+      - 'Makefile'
+      - '.github/workflows/dashboard-localhost.yml'
+  pull_request:
+    paths:
+      - 'dashboard-server/**'
+      - 'dashboard.js'
+      - 'index.html'
+      - 'dashboard.css'
+      - 'labs.config.json'
+      - 'launcher/windows/src/UnikernelLabs.Launcher/labs.windows.json'
+      - 'scripts/sync-launcher-catalog.js'
+      - 'scripts/sync-launcher-catalog.test.js'
+      - 'Makefile'
+      - '.github/workflows/dashboard-localhost.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate localhost dashboard
+        run: node scripts/verify-localhost.js

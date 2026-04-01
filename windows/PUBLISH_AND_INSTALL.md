@@ -1,61 +1,95 @@
 # Publish and install (Windows)
 
-Esta guía resume cómo dejar operativa la **v1** en un equipo Windows.
+Esta guia resume como dejar operativa la v1 en un equipo Windows.
 
 ## 1. Instalar WSL2 y una distro
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\windows\scripts\install-wsl-debian.ps1 -Distro Debian
+powershell -ExecutionPolicy Bypass -File .\windows\scripts\install-wsl-debian.ps1 -Distro Ubuntu
 ```
 
-## 2. Preparar runtime dentro de WSL2
+## 2. Instalar dependencias base dentro de WSL
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\windows\scripts\install-runtime-prereqs.ps1 -Distro Debian
+powershell -ExecutionPolicy Bypass -File .\windows\scripts\install-runtime-prereqs.ps1 -Distro Ubuntu
 ```
 
-## 3. Validar entorno
+Luego completa el runtime:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\windows\scripts\doctor-windows.ps1 -Distro Debian -LinuxRepoPath /home/tu_usuario/dev/unikernel-labs
+wsl.exe -u root -d Ubuntu -- bash -lc "apt-get update && apt-get install -y --no-install-recommends bison build-essential flex git libncurses-dev qemu-system socat unzip wget iptables"
 ```
 
-## 4. Publicar el launcher
+## 3. Instalar KraftKit
+
+Si el repo esta en `C:\dev\unikernel-labs`:
+
+```powershell
+wsl.exe -d Ubuntu -- bash /mnt/c/dev/unikernel-labs/scripts/install-kraft-wsl.sh
+```
+
+## 4. Validar entorno
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\windows\scripts\doctor-windows.ps1 -Distro Ubuntu -LinuxRepoPath /mnt/c/dev/unikernel-labs
+```
+
+## 5. Levantar el dashboard local
+
+```powershell
+cd C:\dev\unikernel-labs
+node dashboard-server/server.js
+```
+
+Verifica:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:9091/api/diagnostics | ConvertTo-Json
+```
+
+## 6. Publicar el launcher
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\windows\scripts\publish-launcher.ps1
 ```
 
-## 5. Ejecutar
-
-Abre el ejecutable publicado y configura:
-
-- distro WSL2
-- ruta Linux del repo
-
-Luego usa:
-
-- Autodetectar entorno
-- Start
-- Stop
-- Logs
-- Health
-- Open
-- Status
-
-## 6. Detectar contexto WSL2
+o manualmente:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\windows\scripts\detect-wsl-context.ps1
+dotnet publish .\launcher\windows\src\UnikernelLabs.Launcher\UnikernelLabs.Launcher.csproj `
+  -c Release `
+  -r win-x64 `
+  --self-contained true `
+  /p:PublishSingleFile=true
 ```
 
-## 7. Health check rápido
+## 7. Configurar el launcher
+
+Al abrir el ejecutable publicado, configura:
+
+- distro WSL2: `Ubuntu`
+- ruta Linux del repo: `/mnt/c/dev/unikernel-labs` o la ruta Linux equivalente
+
+## 8. Validar la superficie localhost
+
+Desde el dashboard o desde la app Windows, prueba un lab como `nginx-runtime`.
+
+Por API:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\windows\scripts\health-lab.ps1 -Lab nginx
+$headers = @{ 'X-UCC-Request'='1'; 'Origin'='http://127.0.0.1:9091' }
+Invoke-RestMethod -Method Post -Headers $headers http://127.0.0.1:9091/api/labs/02/start
+Invoke-RestMethod http://127.0.0.1:9091/api/labs/02/health
+Invoke-WebRequest http://127.0.0.1:8080 -UseBasicParsing
 ```
 
-## 8. Recordatorio técnico
+## 9. Nota de packaging
 
-La app Windows es el **panel de control**.  
-Los servicios unikernel se ejecutan en **WSL2/Linux** y se exponen a **localhost**.
+`labs.windows.json` se genera desde `labs.config.json`.
+
+Si cambias el catalogo antes de publicar:
+
+```powershell
+# desde la raiz del repo
+node scripts/sync-launcher-catalog.js
+```

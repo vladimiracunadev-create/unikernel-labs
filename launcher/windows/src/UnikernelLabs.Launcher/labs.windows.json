@@ -2,61 +2,51 @@
   {
     "Id": "01",
     "Name": "hello-world",
-    "Description": "Validación básica del runtime. No expone URL por defecto.",
+    "Description": "Validación base del runtime. No expone HTTP por defecto.",
     "RelativePath": "01-hello-world",
     "StartCommand": "cd '{lab_path}' && kraft run -W -d --name ukl-hello",
-    "StopCommand": "kraft stop ukl-hello || true",
-    "LogsCommand": "kraft logs ukl-hello || true",
+    "StopCommand": "cd '{lab_path}' && kraft stop ukl-hello || true",
+    "LogsCommand": "cd '{lab_path}' && kraft logs ukl-hello || true",
     "Url": null
   },
   {
     "Id": "02",
-    "Name": "nginx",
-    "Description": "NGINX unikernel en localhost:8080",
+    "Name": "nginx-runtime",
+    "Description": "Servicio HTTP NGINX en localhost:8080.",
     "RelativePath": "02-nginx-runtime",
     "StartCommand": "cd '{lab_path}' && kraft run -W -d --name ukl-nginx -p 8080:80",
-    "StopCommand": "kraft stop ukl-nginx || true",
-    "LogsCommand": "kraft logs ukl-nginx || true",
+    "StopCommand": "cd '{lab_path}' && kraft stop ukl-nginx || true",
+    "LogsCommand": "cd '{lab_path}' && kraft logs ukl-nginx || true",
     "Url": "http://localhost:8080"
   },
   {
     "Id": "03",
     "Name": "python-http",
-    "Description": "Servicio Python en localhost:8081",
+    "Description": "Servicio HTTP Python en localhost:8081.",
     "RelativePath": "03-python-http",
     "StartCommand": "cd '{lab_path}' && kraft run -W -d --name ukl-python -p 8081:8081",
-    "StopCommand": "kraft stop ukl-python || true",
-    "LogsCommand": "kraft logs ukl-python || true",
+    "StopCommand": "cd '{lab_path}' && kraft stop ukl-python || true",
+    "LogsCommand": "cd '{lab_path}' && kraft logs ukl-python || true",
     "Url": "http://localhost:8081"
   },
   {
     "Id": "04",
     "Name": "node-http",
-    "Description": "Servicio Node en localhost:8082",
+    "Description": "Servicio HTTP Node.js en localhost:8082.",
     "RelativePath": "04-node-http",
     "StartCommand": "cd '{lab_path}' && kraft run -W -d --name ukl-node -p 8082:8082",
-    "StopCommand": "kraft stop ukl-node || true",
-    "LogsCommand": "kraft logs ukl-node || true",
+    "StopCommand": "cd '{lab_path}' && kraft stop ukl-node || true",
+    "LogsCommand": "cd '{lab_path}' && kraft logs ukl-node || true",
     "Url": "http://localhost:8082"
   },
   {
     "Id": "05",
-    "Name": "redis",
-    "Description": "Redis en localhost:6379",
+    "Name": "redis-runtime",
+    "Description": "Servicio Redis en localhost:6379.",
     "RelativePath": "05-redis-runtime",
     "StartCommand": "cd '{lab_path}' && kraft run -W -d --name ukl-redis -p 6379:6379",
-    "StopCommand": "kraft stop ukl-redis || true",
-    "LogsCommand": "kraft logs ukl-redis || true",
+    "StopCommand": "cd '{lab_path}' && kraft stop ukl-redis || true",
+    "LogsCommand": "cd '{lab_path}' && kraft logs ukl-redis || true",
     "Url": "redis://localhost:6379"
-  },
-  {
-    "Id": "90",
-    "Name": "dashboard",
-    "Description": "Dashboard estático del repo en localhost:9091",
-    "RelativePath": "",
-    "StartCommand": "cd '{repo}' && nohup python3 -m http.server 9091 >/tmp/unikernel-labs-dashboard.log 2>&1 &",
-    "StopCommand": "pkill -f 'python3 -m http.server 9091' || true",
-    "LogsCommand": "cat /tmp/unikernel-labs-dashboard.log || true",
-    "Url": "http://localhost:9091"
   }
 ]

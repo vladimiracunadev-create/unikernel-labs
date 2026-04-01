@@ -1,21 +1,33 @@
 # Mapeo desde docker-labs
 
-## Qué sí se conserva
+## Que se conserva
 
 - estructura por labs
-- historia principal del repo
-- dashboard local
-- documentación profunda
-- criterio de operación
+- narrativa del repo
+- operacion local
+- foco en `localhost`
+- documentacion por capas
 
-## Qué cambia
+## Que cambia
 
 - `docker compose` deja de ser el centro
-- el runtime pasa a `kraft` / QEMU / KVM / catálogos OCI de Unikraft
-- la compatibilidad Windows se vuelve menos transparente
-- la narrativa técnica migra desde “levanta stacks” hacia “evalúa especialización y compatibilidad”
+- el runtime pasa a `kraft` + QEMU/KVM
+- Windows deja de ser host de runtime y pasa a ser capa de control
+- aparece un dashboard local con API y una app Windows sobre la misma topologia
+- el catalogo raiz pasa a `labs.config.json` y el launcher consume una copia generada
 
-## Traducción sugerida
+## Traduccion sugerida
 
-- Docker Labs = operabilidad de stacks y observabilidad local
-- Unikernel Labs = especialización, arranque y criterio arquitectónico
+- Docker Labs = orquestacion de stacks
+- Unikernel Labs = control local de servicios unikernel sobre WSL2
+
+## Resultado esperado
+
+La experiencia final no es "Docker Desktop con otro nombre".
+
+Es:
+
+- dashboard localhost
+- launcher Windows
+- backend WSL2
+- servicios unikernel publicados en puertos fijos

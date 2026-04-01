@@ -2,20 +2,35 @@
 
 ## Mensaje corto
 
-Sí puedes tener una experiencia tipo aplicación Windows.
+Si, puedes tener una experiencia tipo aplicacion Windows.
 
-No, el unikernel no se ejecuta como proceso Windows nativo común.
+No, el unikernel no corre como un proceso Windows comun.
 
 ## Modelo recomendado
 
-- Windows para UX y launcher
+- Windows para UX
+- dashboard local o launcher para operacion
 - WSL2 para Linux
-- `kraft` para correr y gestionar instancias
+- `kraft` para gestionar instancias
+- QEMU/KVM para el runtime
 - `localhost` para exponer servicios
+
+## Topologia validada
+
+```text
+Windows
+  -> dashboard-server/server.js o launcher WinForms
+  -> wsl.exe
+  -> Ubuntu
+  -> kraft + qemu + iptables
+  -> localhost:8080/8081/8082/6379
+```
 
 ## Recomendaciones
 
-- usar Debian o Ubuntu
-- clonar en filesystem Linux
-- publicar puertos fijos
+- usar `Ubuntu` o `Debian`
+- si priorizas Windows, puedes dejar el repo en `C:\dev\unikernel-labs`
+- si priorizas consola Linux, puedes clonarlo en `~/dev/unikernel-labs`
+- mantener puertos fijos
 - mantener nombres de instancia estables
+- validar siempre con `scripts/doctor.sh` y `scripts/verify-localhost.js`

@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Convertir el laboratorio en algo cercano a una **suite local Windows**, sin fingir que el unikernel corre como proceso nativo de Windows.
+Convertir el laboratorio en una suite local Windows creible, sin fingir que el runtime unikernel corre como proceso nativo de Windows.
 
 ## Arquitectura
 
@@ -16,13 +16,13 @@ Convertir el laboratorio en algo cercano a una **suite local Windows**, sin fing
 [wsl.exe]
    |
    v
-[Debian/Ubuntu en WSL2]
+[Ubuntu o Debian en WSL2]
    |
    v
-[kraft + QEMU/KVM]
+[kraft + QEMU/KVM + iptables]
    |
    v
-[Unikernel / servicio]
+[servicio unikernel]
    |
    v
 [localhost:<puerto>]
@@ -30,42 +30,35 @@ Convertir el laboratorio en algo cercano a una **suite local Windows**, sin fing
 
 ## Responsabilidades del launcher
 
-- autodetectar o pedir nombre de distro
+- autodetectar distro WSL
 - autodetectar o pedir path Linux del repo
-- leer catálogo de labs
+- leer el catalogo generado del launcher
 - iniciar servicios
 - detener servicios
 - consultar logs
 - abrir URLs
-- mostrar salida en una consola integrada
-- verificar salud HTTP/TCP/Redis con más contexto
+- mostrar salida operativa
+- verificar salud HTTP/TCP/Redis
 
-## Qué NO hace el launcher
+## Relacion con el dashboard
+
+El launcher no es una implementacion paralela desconectada.
+
+Debe seguir:
+
+- el mismo catalogo fuente (`labs.config.json`)
+- la misma topologia localhost
+- la misma idea de `Start / Stop / Logs / Health / Open`
+
+## Que no hace
 
 - no reemplaza `kraft`
 - no elimina WSL2
-- no empaqueta por sí solo los unikernels
-- no garantiza compatibilidad universal con todos los labs
+- no empaqueta por si solo los unikernels
+- no garantiza compatibilidad universal con cualquier lab
 
-## Beneficios
+## Posicionamiento correcto
 
-- experiencia más cercana a producto
-- mejor demo para portafolio
-- separación clara entre UX y runtime
-- crecimiento futuro hacia instalador o servicio Windows
+El launcher es la superficie desktop de **Unikernel Control Center v1**.
 
-
-## Relación con packaging
-
-Complementa este documento con `docs/05-packaging-and-publish.md` y `windows/PUBLISH_AND_INSTALL.md` para la ruta de publicación e instalación de la v1.
-
-
-## Ajuste V7
-
-La v7 del launcher agrega:
-
-- autodetección al iniciar
-- selector visual de distros WSL detectadas
-- grilla de servicios con estado por colores
-
-Esto refuerza el posicionamiento de **Unikernel Control Center v1** como capa operativa Windows, sin presentarlo todavía como `Desktop`.
+No debe venderse todavia como un "Unikernel Desktop" completo.
