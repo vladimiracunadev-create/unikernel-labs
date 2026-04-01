@@ -50,6 +50,8 @@ Debe seguir:
 - la misma topologia localhost
 - la misma idea de `Start / Stop / Logs / Health / Open`
 
+El dashboard sigue siendo local. No forma parte de una estrategia de publicacion en GitHub Pages.
+
 ## Que no hace
 
 - no reemplaza `kraft`

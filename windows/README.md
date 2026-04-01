@@ -14,6 +14,8 @@ Windows aporta:
 - apertura de `localhost`
 - publicacion del `.exe`
 
+No aporta ni necesita una publicacion del dashboard en GitHub Pages.
+
 El runtime real sigue estando en:
 
 - WSL2

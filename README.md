@@ -41,6 +41,7 @@ La arquitectura correcta es esta:
 ```
 
 No es un dashboard estatico. No es un runtime Windows nativo para `kraft`. Es una capa de control Windows sobre un runtime Linux real.
+GitHub Pages no forma parte del producto ni del flujo soportado: el dashboard es local y la superficie adicional soportada es la aplicacion Windows.
 
 ---
 
@@ -55,6 +56,7 @@ Lo que hoy esta implementado y documentado en este repo:
 - catalogo del launcher generado desde ese catalogo raiz
 - scripts para sincronizar catalogo y verificar el flujo localhost
 - launcher WinForms que consume el mismo set de labs
+- sin despliegue a GitHub Pages
 
 Lo que se valido durante esta iteracion:
 
