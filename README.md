@@ -17,20 +17,65 @@
 
 ---
 
-## Qué cambia en esta iteración
+## Web Dashboard — Node.js REST API
 
-Esta v7 del starter sube un peldaño práctico importante:
+El dashboard **no es estático**. Es un servidor Node.js que corre en Windows y proxea todos los comandos `kraft` hacia WSL2 automáticamente.
 
-- **autodetección al iniciar** para dejar el entorno más listo desde la apertura
-- **selector visual de distros WSL detectadas** en el launcher
-- **grilla de servicios con estado por colores**
-- **health checks más útiles** para HTTP, Redis y TCP
-- **persistencia simple de configuración**, incluyendo el último servicio seleccionado
-- **sidebar, cards y publish** mantenidos como base de producto
+```
+[ Navegador → http://localhost:9091 ]
+         |
+[ dashboard-server/server.js  (Node.js en Windows) ]
+         |
+[ wsl.exe -d Ubuntu -- bash -lc "kraft ..." ]
+         |
+[ kraft + QEMU/KVM dentro de WSL2 ]
+         |
+[ servicios unikernel en localhost:808x / 6379 ]
+```
 
-No cambia la verdad técnica del proyecto:
+### Levantar el dashboard (desde Windows)
 
-**sigue siendo un Control Center v1**, no un reemplazo 1:1 de Docker Desktop ni un runtime Windows nativo para `kraft`.
+```powershell
+# Requiere Node.js instalado en Windows — sin dependencias externas
+node dashboard-server/server.js
+# o equivalente:
+make serve
+```
+
+Abrir en el navegador: **http://localhost:9091**
+
+### Lo que muestra el dashboard
+
+| Elemento | Descripción |
+|---|---|
+| Panel de diagnóstico | Estado de WSL2, versión de kraft instalada, API activa |
+| Cards por lab | Barra de color: verde=corriendo, gris=detenido, atenuado=planificado |
+| Controles por lab | Iniciar · Detener · Logs · Abrir (solo si el servicio está activo) |
+| Búsqueda en tiempo real | Filtra por nombre o puerto |
+| Auto-refresh | Actualización automática cada 10 segundos |
+
+### Instalar kraft en WSL (requerido para operar labs)
+
+```bash
+wsl -d Ubuntu -- bash -lc "curl -sSfL get.kraftkit.sh | sh"
+```
+
+Una vez instalado, el panel de diagnóstico muestra la versión detectada y todos los controles Iniciar / Detener / Logs funcionan desde el navegador sin configuración adicional.
+
+---
+
+## Qué incluye esta versión
+
+- **dashboard web con REST API** — Node.js sin dependencias externas, corre en Windows
+- **proxy WSL2 automático** — detecta la distro Ubuntu al arrancar, no requiere configuración
+- **panel de diagnóstico** — WSL2, kraft, API en una sola vista
+- **selector visual de distros WSL** en el launcher Windows
+- **grilla de servicios con estado por colores** (running / stopped / planned)
+- **health checks** por protocolo: HTTP, Redis, TCP
+- **logs en tiempo real** al iniciar/detener desde el dashboard
+- **persistencia de configuración** en el launcher
+
+**sigue siendo un Control Center v1**, no un reemplazo de Docker Desktop ni un runtime Windows nativo para `kraft`.
 
 ---
 
@@ -119,29 +164,31 @@ sin fingir que el runtime corre como proceso Windows nativo.
 
 ## Componentes principales
 
-- `01-hello-world` a `08-kraft-cloud-track`: labs y rutas de aprendizaje
-- `index.html`, `dashboard.js`, `dashboard.css`: dashboard estático local
-- `windows/scripts/`: automatización PowerShell para Windows + WSL2
-- `launcher/windows/src/UnikernelLabs.Launcher/`: app WinForms .NET 8
-- `docs/04-windows-localhost-launcher.md`: arquitectura del control center
-- `docs/05-packaging-and-publish.md`: build, publish e instalación sugerida
-- `windows/PUBLISH_AND_INSTALL.md`: guía rápida Windows
-- `labs.config.json`: catálogo del dashboard
-- `launcher/windows/src/UnikernelLabs.Launcher/labs.windows.json`: catálogo consumido por el launcher
+| Componente | Descripción |
+|---|---|
+| `dashboard-server/server.js` | Servidor Node.js — REST API + proxy WSL2 para kraft |
+| `index.html` / `dashboard.js` / `dashboard.css` | Frontend del dashboard web |
+| `labs.config.json` | Catálogo de labs: id, puerto, comando de inicio, health protocol |
+| `launcher/windows/src/UnikernelLabs.Launcher/` | App WinForms .NET 8 para Windows |
+| `01-hello-world` … `08-kraft-cloud-track` | Labs y rutas de aprendizaje |
+| `Makefile` | `serve`, `doctor`, `run-*`, `stop-*`, `logs-*`, `benchmark-*` |
+| `scripts/` | Bash helpers: doctor, benchmark |
+| `docs/` | Documentación extendida por tema |
 
 ---
 
 ## Quickstart por capas
 
-### A. Dashboard estático
+### A. Web Dashboard (recomendado)
 
-Dentro de WSL2:
+Desde Windows (requiere Node.js):
 
-```bash
-cd ~/dev/unikernel-labs
-make serve
-# abrir en Windows: http://localhost:9091
+```powershell
+cd C:\dev\unikernel-labs
+node dashboard-server/server.js
 ```
+
+Abrir **http://localhost:9091** en el navegador. El panel de diagnóstico indica si WSL2 y kraft están listos.
 
 ### B. Validar entorno Linux/WSL2
 
