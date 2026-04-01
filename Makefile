@@ -4,7 +4,7 @@ SHELL := /bin/bash
 
 help:
 	@echo "Targets disponibles:"
-	@echo "  make serve         # dashboard local en 9091"
+	@echo "  make serve         # servidor Node.js + REST API en 9091"
 	@echo "  make doctor        # diagnóstico rápido del host"
 	@echo "  make run-hello     # hello world (validación)"
 	@echo "  make run-nginx     # nginx unikernel en 8080"
@@ -17,7 +17,7 @@ help:
 	@echo "  make benchmark-nginx"
 
 serve:
-	@python3 -m http.server 9091
+	@node dashboard-server/server.js
 
 doctor:
 	@bash scripts/doctor.sh

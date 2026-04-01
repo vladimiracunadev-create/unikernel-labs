@@ -7,15 +7,26 @@
       "name": "hello-world",
       "path": "01-hello-world",
       "status": "ready",
-      "description": "Validación base del runtime. No expone HTTP por defecto."
+      "description": "Validación base del runtime. No expone HTTP por defecto.",
+      "kraftName": "ukl-hello",
+      "startCommand": "kraft run -W -d --name ukl-hello",
+      "stopCommand": "kraft stop ukl-hello || true",
+      "logsCommand": "kraft logs ukl-hello || true",
+      "healthProtocol": null
     },
     {
       "id": "02",
       "name": "nginx-runtime",
       "path": "02-nginx-runtime",
       "status": "ready",
-      "description": "Servicio HTTP en localhost:8080 controlable desde launcher Windows.",
-      "url": "http://localhost:8080"
+      "description": "Servicio HTTP NGINX en localhost:8080.",
+      "url": "http://localhost:8080",
+      "port": 8080,
+      "kraftName": "ukl-nginx",
+      "startCommand": "kraft run -W -d --name ukl-nginx -p 8080:80",
+      "stopCommand": "kraft stop ukl-nginx || true",
+      "logsCommand": "kraft logs ukl-nginx || true",
+      "healthProtocol": "http"
     },
     {
       "id": "03",
@@ -23,15 +34,27 @@
       "path": "03-python-http",
       "status": "ready",
       "description": "Servicio HTTP Python en localhost:8081.",
-      "url": "http://localhost:8081"
+      "url": "http://localhost:8081",
+      "port": 8081,
+      "kraftName": "ukl-python",
+      "startCommand": "kraft run -W -d --name ukl-python -p 8081:8081",
+      "stopCommand": "kraft stop ukl-python || true",
+      "logsCommand": "kraft logs ukl-python || true",
+      "healthProtocol": "http"
     },
     {
       "id": "04",
       "name": "node-http",
       "path": "04-node-http",
       "status": "ready",
-      "description": "Servicio HTTP Node en localhost:8082.",
-      "url": "http://localhost:8082"
+      "description": "Servicio HTTP Node.js en localhost:8082.",
+      "url": "http://localhost:8082",
+      "port": 8082,
+      "kraftName": "ukl-node",
+      "startCommand": "kraft run -W -d --name ukl-node -p 8082:8082",
+      "stopCommand": "kraft stop ukl-node || true",
+      "logsCommand": "kraft logs ukl-node || true",
+      "healthProtocol": "http"
     },
     {
       "id": "05",
@@ -39,36 +62,37 @@
       "path": "05-redis-runtime",
       "status": "ready",
       "description": "Servicio Redis en localhost:6379.",
-      "url": "redis://localhost:6379"
+      "url": "redis://localhost:6379",
+      "port": 6379,
+      "kraftName": "ukl-redis",
+      "startCommand": "kraft run -W -d --name ukl-redis -p 6379:6379",
+      "stopCommand": "kraft stop ukl-redis || true",
+      "logsCommand": "kraft logs ukl-redis || true",
+      "healthProtocol": "redis"
     },
     {
       "id": "06",
       "name": "benchmarks",
       "path": "06-benchmarks",
       "status": "planned",
-      "description": "Comparativas Docker vs Unikernel vs nativo."
+      "description": "Comparativas Docker vs Unikernel vs nativo.",
+      "healthProtocol": null
     },
     {
       "id": "07",
       "name": "runu-track",
       "path": "07-runu-track",
       "status": "planned",
-      "description": "Pista OCI / runtime avanzado."
+      "description": "Pista OCI / runtime avanzado.",
+      "healthProtocol": null
     },
     {
       "id": "08",
       "name": "kraft-cloud-track",
       "path": "08-kraft-cloud-track",
       "status": "planned",
-      "description": "Pista cloud y compose experimental."
-    },
-    {
-      "id": "09",
-      "name": "windows-launcher",
-      "path": "launcher/windows/src/UnikernelLabs.Launcher",
-      "status": "ready",
-      "description": "Aplicación Windows para iniciar, detener, ver logs y abrir servicios localhost.",
-      "url": "http://localhost:9091"
+      "description": "Pista cloud y compose experimental.",
+      "healthProtocol": null
     }
   ]
 }
