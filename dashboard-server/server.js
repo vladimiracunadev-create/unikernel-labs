@@ -17,7 +17,7 @@ let WSL_DISTRO = '';
 function detectDistro() {
   return new Promise(resolve => {
     if (!IS_WIN) { resolve(''); return; }
-    exec('wsl.exe -l -q', (err, out) => {
+    exec('wsl.exe -l -q', { windowsHide: true }, (err, out) => {
       if (err) { resolve(''); return; }
       const lines = out.split(/[\r\n]+/)
         .map(l => l.replace(/\0/g, '').trim())
@@ -72,7 +72,7 @@ function execAsync(command, labRelativePath) {
       cmd = `bash -lc ${JSON.stringify(`cd ${cwd} && ${command}`)}`;
     }
 
-    exec(cmd, { timeout }, (err, stdout, stderr) => {
+    exec(cmd, { timeout, windowsHide: true }, (err, stdout, stderr) => {
       resolve({
         ok:     !err,
         output: (stdout + stderr).trim(),
