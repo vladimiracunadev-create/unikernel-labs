@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#13284d"/>
+      <stop offset="100%" stop-color="#244680"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <rect x="44" y="44" width="424" height="424" rx="84" fill="none" stroke="#8cbcff" stroke-width="4" opacity=".9"/>
+  <rect x="72" y="72" width="368" height="368" rx="70" fill="none" stroke="#8cbcff" stroke-width="4" opacity=".55"/>
+  <circle cx="256" cy="256" r="92" fill="none" stroke="#d7ebff" stroke-width="12"/>
+  <circle cx="256" cy="256" r="142" fill="none" stroke="#bddcff" stroke-width="10" opacity=".8"/>
+  <circle cx="256" cy="256" r="188" fill="none" stroke="#9ac9ff" stroke-width="8" opacity=".5"/>
+  <rect x="176" y="176" width="160" height="160" rx="38" fill="#e5f1ff" stroke="#fff" stroke-width="3"/>
+  <path d="M120 256h56m160 0h56M256 120v56m0 160v56" stroke="#dcecff" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="120" cy="256" r="18" fill="#96d7ff"/>
+  <circle cx="392" cy="256" r="18" fill="#96d7ff"/>
+  <circle cx="256" cy="120" r="18" fill="#96d7ff"/>
+  <circle cx="256" cy="392" r="18" fill="#96d7ff"/>
+  <text x="256" y="253" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="74" font-weight="700" fill="#2d4f7d">UCC</text>
+  <text x="256" y="303" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="30" fill="#486389">v1</text>
+</svg>

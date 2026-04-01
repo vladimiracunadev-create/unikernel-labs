@@ -1,0 +1,21 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+.ideas/
+.vscode/
+.terraform/
+.terraform.lock.hcl
+*.log
+*.tmp
+build/
+out/
+.unikraft/
+site/
+reports/*.txt
+reports/*.json
+
+# Launcher build outputs
+launcher/windows/src/UnikernelLabs.Launcher/bin/
+launcher/windows/src/UnikernelLabs.Launcher/obj/

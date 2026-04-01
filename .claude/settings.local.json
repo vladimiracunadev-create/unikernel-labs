@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /c/dev/unikernel-labs/0*/)",
+      "Bash(xargs ls:*)",
+      "Bash(dotnet build:*)",
+      "Bash(where dotnet:*)",
+      "Bash(cmd.exe /c \"where dotnet\")",
+      "Read(//c/Program Files/dotnet/**)",
+      "Bash(cmd.exe /c \"dotnet build \"\"C:\\\\dev\\\\unikernel-labs\\\\launcher\\\\windows\\\\src\\\\UnikernelLabs.Launcher.Tests\\\\UnikernelLabs.Launcher.Tests.csproj\"\" 2>&1\")",
+      "Bash(powershell.exe -Command \"dotnet build ''C:\\\\dev\\\\unikernel-labs\\\\launcher\\\\windows\\\\src\\\\UnikernelLabs.Launcher.Tests\\\\UnikernelLabs.Launcher.Tests.csproj'' 2>&1\")",
+      "Bash(gh auth:*)"
+    ]
+  }
+}

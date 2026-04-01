@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Unikernel Control Center v1</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <main class="container">
+    <section class="hero">
+      <div class="hero-brand">
+        <img src="assets/branding/ucc-logo.png" alt="Logo UCC v1">
+        <div>
+          <span class="eyebrow">Launcher Windows + backend WSL2</span>
+          <h1 id="project-name">Unikernel Control Center v1</h1>
+          <p id="project-subtitle">Suite local para operar servicios unikernel de forma controlada, con localhost por servicio y una narrativa de producto honesta.</p>
+          <div class="hero-badges">
+            <span class="badge info">Versión 1</span>
+            <span class="badge info">Windows + WSL2</span>
+            <span class="badge info">Localhost por servicio</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>Propuesta real</h2>
+        <p>No es un demo decorativo. Es una base operativa para iniciar, detener, revisar logs y abrir servicios unikernel desde una aplicación Windows.</p>
+      </article>
+      <article class="panel">
+        <h2>Arquitectura honesta</h2>
+        <div class="code">.exe Windows → WSL2 → kraft → localhost</div>
+        <p>La UX vive arriba. El runtime real sigue abajo, en Linux.</p>
+      </article>
+      <article class="panel">
+        <h2>Ruta sugerida</h2>
+        <div class="code">make doctor</div>
+        <div class="code">make run-nginx</div>
+        <div class="code">make run-python</div>
+      </article>
+    </section>
+
+    <section class="section-title-wrap">
+      <h2 class="section-title">Catálogo inicial</h2>
+      <p>Servicios y rutas de prueba pensadas para una versión 1 seria y demostrable.</p>
+    </section>
+
+    <section>
+      <div class="labs" id="labs"></div>
+    </section>
+
+    <p class="footer">Repositorio <strong>unikernel-labs</strong> orientado a evolucionar desde un <strong>Control Center v1</strong> hacia una experiencia más completa de escritorio.</p>
+  </main>
+  <script src="dashboard.js"></script>
+</body>
+</html>

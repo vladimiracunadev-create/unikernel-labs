@@ -1,0 +1,74 @@
+{
+  "project": "Unikernel Control Center v1",
+  "subtitle": "Windows launcher + WSL2 + localhost por servicio",
+  "labs": [
+    {
+      "id": "01",
+      "name": "hello-world",
+      "path": "01-hello-world",
+      "status": "ready",
+      "description": "Validación base del runtime. No expone HTTP por defecto."
+    },
+    {
+      "id": "02",
+      "name": "nginx-runtime",
+      "path": "02-nginx-runtime",
+      "status": "ready",
+      "description": "Servicio HTTP en localhost:8080 controlable desde launcher Windows.",
+      "url": "http://localhost:8080"
+    },
+    {
+      "id": "03",
+      "name": "python-http",
+      "path": "03-python-http",
+      "status": "ready",
+      "description": "Servicio HTTP Python en localhost:8081.",
+      "url": "http://localhost:8081"
+    },
+    {
+      "id": "04",
+      "name": "node-http",
+      "path": "04-node-http",
+      "status": "ready",
+      "description": "Servicio HTTP Node en localhost:8082.",
+      "url": "http://localhost:8082"
+    },
+    {
+      "id": "05",
+      "name": "redis-runtime",
+      "path": "05-redis-runtime",
+      "status": "ready",
+      "description": "Servicio Redis en localhost:6379.",
+      "url": "redis://localhost:6379"
+    },
+    {
+      "id": "06",
+      "name": "benchmarks",
+      "path": "06-benchmarks",
+      "status": "planned",
+      "description": "Comparativas Docker vs Unikernel vs nativo."
+    },
+    {
+      "id": "07",
+      "name": "runu-track",
+      "path": "07-runu-track",
+      "status": "planned",
+      "description": "Pista OCI / runtime avanzado."
+    },
+    {
+      "id": "08",
+      "name": "kraft-cloud-track",
+      "path": "08-kraft-cloud-track",
+      "status": "planned",
+      "description": "Pista cloud y compose experimental."
+    },
+    {
+      "id": "09",
+      "name": "windows-launcher",
+      "path": "launcher/windows/src/UnikernelLabs.Launcher",
+      "status": "ready",
+      "description": "Aplicación Windows para iniciar, detener, ver logs y abrir servicios localhost.",
+      "url": "http://localhost:9091"
+    }
+  ]
+}

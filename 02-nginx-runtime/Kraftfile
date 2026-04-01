@@ -1,0 +1,5 @@
+spec: v0.6
+name: nginx-runtime
+runtime: unikraft.org/nginx:1.25
+targets:
+  - qemu/x86_64

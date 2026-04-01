@@ -1,0 +1,82 @@
+name: dotnet-launcher
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - 'launcher/windows/src/**'
+      - '.github/workflows/dotnet-launcher.yml'
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    paths:
+      - 'launcher/windows/src/**'
+      - '.github/workflows/dotnet-launcher.yml'
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore .\launcher\windows\src\UnikernelLabs.Launcher\UnikernelLabs.Launcher.csproj
+
+      - name: Build
+        run: dotnet build .\launcher\windows\src\UnikernelLabs.Launcher\UnikernelLabs.Launcher.csproj -c Release --no-restore
+
+      - name: Restore tests
+        run: dotnet restore .\launcher\windows\src\UnikernelLabs.Launcher.Tests\UnikernelLabs.Launcher.Tests.csproj
+
+      - name: Test
+        run: dotnet test .\launcher\windows\src\UnikernelLabs.Launcher.Tests\UnikernelLabs.Launcher.Tests.csproj -c Release --no-restore --logger "console;verbosity=normal"
+
+  publish-release:
+    needs: build-and-test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Publish self-contained exe
+        run: |
+          dotnet publish .\launcher\windows\src\UnikernelLabs.Launcher\UnikernelLabs.Launcher.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            /p:PublishSingleFile=true `
+            -o .\publish\win-x64
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Unikernel Control Center ${{ github.ref_name }}"
+          body: |
+            ## Unikernel Control Center ${{ github.ref_name }}
+
+            Suite local orientada a Windows para gobernar servicios unikernel con backend WSL2 y acceso por localhost.
+
+            ### Instalación
+            1. Descarga `UnikernelLabs.Launcher.exe`
+            2. Ejecuta el `.exe` (no requiere instalación, es auto-contenido)
+            3. Configura tu distro WSL2 y la ruta del repositorio
+
+            ### Requisitos
+            - Windows 10/11 con WSL2 habilitado
+            - Distro Linux (Debian/Ubuntu recomendado) con `kraft` instalado
+
+            Ver [ENVIRONMENT_SETUP.md](https://github.com/${{ github.repository }}/blob/main/ENVIRONMENT_SETUP.md) para instrucciones completas.
+          files: |
+            publish\win-x64\UnikernelLabs.Launcher.exe
+          draft: false
+          prerelease: false

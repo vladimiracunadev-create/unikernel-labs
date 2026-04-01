@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#102240"/>
+      <stop offset="1" stop-color="#2D5AA0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="640" rx="28" fill="url(#bg)"/>
+  <rect x="58" y="64" width="1164" height="512" rx="24" fill="#F7FAFF" fill-opacity="0.08" stroke="#9CB6E4"/>
+  <text x="94" y="150" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="44" font-weight="700">Unikernel Control Center v1</text>
+  <text x="94" y="198" fill="#D6E3FF" font-family="Segoe UI, Arial, sans-serif" font-size="22">Launcher Windows + WSL2 para levantar servicios unikernel con localhost, autodetect y estado visual.</text>
+  <rect x="94" y="244" width="220" height="44" rx="12" fill="#295CA8"/>
+  <text x="120" y="273" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600">Versión 1</text>
+  <rect x="336" y="244" width="286" height="44" rx="12" fill="#3C6BB1"/>
+  <text x="360" y="273" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600">Autodetect al iniciar</text>
+  <rect x="646" y="244" width="286" height="44" rx="12" fill="#3A7590"/>
+  <text x="670" y="273" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600">Selector de distros</text>
+  <rect x="956" y="244" width="210" height="44" rx="12" fill="#4E8B6F"/>
+  <text x="980" y="273" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600">Grilla OK/FAIL</text>
+  <rect x="94" y="330" width="320" height="178" rx="18" fill="#FFFFFF" fill-opacity="0.08" stroke="#AFC4EA"/>
+  <text x="118" y="366" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Panel Windows</text>
+  <text x="118" y="404" fill="#D6E3FF" font-family="Segoe UI, Arial, sans-serif" font-size="18">• Start / Stop / Logs</text>
+  <text x="118" y="434" fill="#D6E3FF" font-family="Segoe UI, Arial, sans-serif" font-size="18">• Health total</text>
+  <text x="118" y="464" fill="#D6E3FF" font-family="Segoe UI, Arial, sans-serif" font-size="18">• Apertura de localhost</text>
+  <text x="118" y="494" fill="#D6E3FF" font-family="Segoe UI, Arial, sans-serif" font-size="18">• Estado por servicio</text>
+  <rect x="446" y="330" width="320" height="178" rx="18" fill="#FFFFFF" fill-opacity="0.08" stroke="#AFC4EA"/>
+  <text x="470" y="366" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Backend WSL2</text>
+  <text x="470" y="404" fill="#D6E3FF" font-family="Segoe UI, Arial, sans-serif" font-size="18">• Debian / Ubuntu</text>
+  <text x="470" y="434" fill="#D6E3FF" font-family="Segoe UI, Arial, sans-serif" font-size="18">• kraft + QEMU/KVM</text>
+  <text x="470" y="464" fill="#D6E3FF" font-family="Segoe UI, Arial, sans-serif" font-size="18">• Ruta Linux autodetectada</text>
+  <text x="470" y="494" fill="#D6E3FF" font-family="Segoe UI, Arial, sans-serif" font-size="18">• Persistencia simple</text>
+  <rect x="798" y="330" width="368" height="178" rx="18" fill="#FFFFFF" fill-opacity="0.08" stroke="#AFC4EA"/>
+  <text x="822" y="366" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Servicios locales</text>
+  <text x="822" y="404" fill="#D6E3FF" font-family="Segoe UI, Arial, sans-serif" font-size="18">• NGINX → http://localhost:8080</text>
+  <text x="822" y="434" fill="#D6E3FF" font-family="Segoe UI, Arial, sans-serif" font-size="18">• Python → http://localhost:8081</text>
+  <text x="822" y="464" fill="#D6E3FF" font-family="Segoe UI, Arial, sans-serif" font-size="18">• Node → http://localhost:8082</text>
+  <text x="822" y="494" fill="#D6E3FF" font-family="Segoe UI, Arial, sans-serif" font-size="18">• Redis → redis://localhost:6379</text>
+  <text x="94" y="552" fill="#D6E3FF" font-family="Segoe UI, Arial, sans-serif" font-size="18">No reemplaza Docker Desktop: posiciona una v1 honesta de Control Center para servicios unikernel.</text>
+</svg>

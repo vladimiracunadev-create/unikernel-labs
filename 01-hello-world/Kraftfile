@@ -1,0 +1,5 @@
+spec: v0.6
+name: hello-world
+runtime: unikraft.org/helloworld:latest
+targets:
+  - qemu/x86_64
