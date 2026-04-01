@@ -250,7 +250,7 @@ detectDistro().then(() => {
     }
   });
 
-  server.listen(PORT, '0.0.0.0', () => {
+  server.listen(PORT, '127.0.0.1', () => {
     console.log(`\n  Unikernel Control Center`);
     console.log(`  http://localhost:${PORT}`);
     console.log(`  Mode: ${IS_WIN ? 'Windows → WSL2' : 'Linux native'}\n`);
