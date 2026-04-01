@@ -1,3 +1,4 @@
+using Xunit;
 using UnikernelLabs.Launcher.Services;
 
 namespace UnikernelLabs.Launcher.Tests;
