@@ -2,104 +2,59 @@
 
 let _labs   = [];
 let _logsId = null;
+let _diag   = null;
 
 // ── API ───────────────────────────────────────────────────────────────────────
-async function get(url)  { const r = await fetch(url);              if (!r.ok) throw new Error(r.status); return r.json(); }
-async function post(url) { const r = await fetch(url,{method:'POST'}); if (!r.ok) throw new Error(r.status); return r.json(); }
-
-// ── Render ────────────────────────────────────────────────────────────────────
-function buildCard(lab) {
-  const running = !!lab.running;
-  const planned = lab.status === 'planned';
-  const runnable = !!lab.kraftName;
-
-  // Status class for card accent
-  const state = running ? 'running' : planned ? 'planned' : 'stopped';
-
-  // Port pill
-  const portPill = lab.port
-    ? `<span class="port-pill">:${lab.port}</span>`
-    : '';
-
-  // Health protocol icon
-  const proto = { http:'HTTP', redis:'Redis', tcp:'TCP' }[lab.healthProtocol] || '';
-  const protoPill = proto ? `<span class="proto-pill">${proto}</span>` : '';
-
-  // Running indicator row
-  const indicator = running
-    ? `<div class="running-bar"><span class="pulse-dot"></span> Servicio activo</div>`
-    : planned
-      ? `<div class="planned-bar">Próximamente</div>`
-      : `<div class="stopped-bar">Detenido</div>`;
-
-  // Controls
-  let controls = '';
-  if (runnable) {
-    const openBtn = lab.url && !lab.url.startsWith('redis://')
-      ? running
-        ? `<button class="btn-card btn-open" data-url="${lab.url}">↗ Abrir</button>`
-        : `<button class="btn-card btn-open btn-open-off" disabled title="Inicia el servicio primero">↗ Abrir</button>`
-      : '';
-
-    controls = `
-      <div class="card-controls">
-        <button class="btn-card btn-start" data-id="${lab.id}" ${running ? 'disabled' : ''}>▶ Iniciar</button>
-        <button class="btn-card btn-stop"  data-id="${lab.id}" ${!running ? 'disabled' : ''}>■ Detener</button>
-        <button class="btn-card btn-logs"  data-id="${lab.id}">≡ Logs</button>
-        ${openBtn}
-      </div>`;
-  } else {
-    controls = `<div class="card-controls"><span class="soon-label">Sin comandos configurados</span></div>`;
-  }
-
-  return `
-    <article class="lab-card state-${state}" data-id="${lab.id}">
-      <div class="card-accent"></div>
-      <div class="card-body">
-        <div class="card-top">
-          <div class="card-pills">${portPill}${protoPill}</div>
-          <span class="card-id">#${lab.id}</span>
-        </div>
-        <h3 class="card-name">${lab.name}</h3>
-        <p class="card-desc">${lab.description}</p>
-        ${indicator}
-        ${controls}
-      </div>
-    </article>`;
+async function get(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+async function post(url) {
+  const r = await fetch(url, { method: 'POST' });
+  return r.json(); // don't throw — always show output
 }
 
-function render() {
-  const q    = (document.getElementById('search-input')?.value || '').toLowerCase();
-  const list = q
-    ? _labs.filter(l => l.name.toLowerCase().includes(q) || String(l.port||'').includes(q))
-    : _labs;
-
-  const container = document.getElementById('labs');
-  if (!list.length) {
-    container.innerHTML = '<div class="lab-placeholder">Sin resultados.</div>';
-    return;
-  }
-  container.innerHTML = list.map(buildCard).join('');
-}
-
-// ── Data ──────────────────────────────────────────────────────────────────────
-async function load() {
+// ── Diagnostics ───────────────────────────────────────────────────────────────
+async function loadDiagnostics() {
   try {
-    _labs = await get('/api/labs');
-    setHint('API conectada · auto-refresh 10s', 'ok');
+    _diag = await get('/api/diagnostics');
+    renderDiag(_diag);
+    setHint(
+      _diag.kraft.ok
+        ? `kraft ${_diag.kraft.detail} · WSL: ${_diag.distro}`
+        : `⚠ kraft no instalado en WSL (${_diag.distro || 'sin distro'})`,
+      _diag.kraft.ok ? 'ok' : 'warn'
+    );
   } catch {
-    try {
-      const cfg = await get('/labs.config.json');
-      _labs = cfg.labs.map(l => ({ ...l, running: false }));
-      setHint('Modo estático — inicia el servidor para control en vivo', 'warn');
-    } catch {
-      setHint('Error cargando configuración', 'err');
-    }
+    setHint('Modo estático — servidor no disponible', 'warn');
   }
-  render();
-  await loadStats();
 }
 
+function renderDiag(d) {
+  const el = document.getElementById('diag-panel');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="diag-row">
+      <span class="diag-dot ${d.wsl.ok ? 'dot-ok' : 'dot-warn'}"></span>
+      <span>WSL2</span>
+      <span class="diag-val">${d.distro || 'no detectado'}</span>
+    </div>
+    <div class="diag-row">
+      <span class="diag-dot ${d.kraft.ok ? 'dot-ok' : 'dot-err'}"></span>
+      <span>kraft</span>
+      <span class="diag-val">${d.kraft.ok ? d.kraft.detail : 'no instalado'}</span>
+    </div>
+    <div class="diag-row">
+      <span class="diag-dot dot-ok"></span>
+      <span>API</span>
+      <span class="diag-val">:9091 activa</span>
+    </div>
+    ${!d.kraft.ok ? `<div class="diag-warn">Instala kraft en WSL: <code>curl -sSfL get.kraftkit.sh | sh</code></div>` : ''}
+  `;
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
 async function loadStats() {
   try {
     const d = await get('/api/overview');
@@ -115,24 +70,108 @@ async function loadStats() {
   }
 }
 
-// ── Actions ───────────────────────────────────────────────────────────────────
-async function start(id) {
-  setBusy(id, true);
-  try { await post(`/api/labs/${id}/start`); } catch(e) { console.warn(e); }
-  await load();
+// ── Labs ──────────────────────────────────────────────────────────────────────
+async function loadLabs() {
+  try {
+    _labs = await get('/api/labs');
+  } catch {
+    try {
+      const cfg = await get('/labs.config.json');
+      _labs = cfg.labs.map(l => ({ ...l, running: false }));
+    } catch { return; }
+  }
+  render();
 }
 
-async function stop(id) {
+function render() {
+  const q         = (document.getElementById('search-input')?.value || '').toLowerCase();
+  const container = document.getElementById('labs');
+  const filtered  = q ? _labs.filter(l =>
+    l.name.toLowerCase().includes(q) || String(l.port || '').includes(q)
+  ) : _labs;
+
+  if (!filtered.length) {
+    container.innerHTML = '<div class="lab-placeholder">Sin resultados.</div>';
+    return;
+  }
+  container.innerHTML = filtered.map(buildCard).join('');
+}
+
+function buildCard(lab) {
+  const running  = !!lab.running;
+  const planned  = lab.status === 'planned';
+  const runnable = !!lab.kraftName;
+  const state    = running ? 'running' : planned ? 'planned' : 'stopped';
+
+  const portPill  = lab.port ? `<span class="port-pill">:${lab.port}</span>` : '';
+  const protoPill = lab.healthProtocol
+    ? `<span class="proto-pill">${lab.healthProtocol.toUpperCase()}</span>` : '';
+
+  const statusBar = running
+    ? `<div class="status-bar bar-running"><span class="pulse-dot"></span>Servicio activo en localhost:${lab.port}</div>`
+    : planned
+      ? `<div class="status-bar bar-planned">Próximamente</div>`
+      : `<div class="status-bar bar-stopped">Detenido</div>`;
+
+  let controls = '';
+  if (runnable) {
+    const canOpen = lab.url && !lab.url.startsWith('redis://');
+    const openBtn = canOpen
+      ? running
+        ? `<button class="btn-card btn-open" data-url="${lab.url}">↗ Abrir</button>`
+        : `<button class="btn-card btn-open btn-disabled" disabled title="Inicia primero el servicio">↗ Abrir</button>`
+      : '';
+    controls = `
+      <div class="card-controls">
+        <button class="btn-card btn-start" data-id="${lab.id}" ${running ? 'disabled' : ''}>▶ Iniciar</button>
+        <button class="btn-card btn-stop"  data-id="${lab.id}" ${!running ? 'disabled' : ''}>■ Detener</button>
+        <button class="btn-card btn-logs"  data-id="${lab.id}">≡ Logs</button>
+        ${openBtn}
+      </div>`;
+  } else {
+    controls = `<div class="card-controls"><span class="soon-label">Sin comandos</span></div>`;
+  }
+
+  return `
+    <article class="lab-card state-${state}" data-id="${lab.id}">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <div class="card-pills">${portPill}${protoPill}</div>
+          <span class="card-id">#${lab.id}</span>
+        </div>
+        <h3 class="card-name">${lab.name}</h3>
+        <p class="card-desc">${lab.description}</p>
+        ${statusBar}
+        ${controls}
+      </div>
+    </article>`;
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+async function startLab(id) {
   setBusy(id, true);
-  try { await post(`/api/labs/${id}/stop`); } catch(e) { console.warn(e); }
-  await load();
+  openLogsPanel(id, 'Iniciando…');
+  const r = await post(`/api/labs/${id}/start`);
+  appendLog(r?.output || '(sin respuesta)');
+  await refresh();
+  setBusy(id, false);
+}
+
+async function stopLab(id) {
+  setBusy(id, true);
+  openLogsPanel(id, 'Deteniendo…');
+  const r = await post(`/api/labs/${id}/stop`);
+  appendLog(r?.output || '(sin respuesta)');
+  await refresh();
+  setBusy(id, false);
 }
 
 async function stopAll() {
   const btn = document.getElementById('btn-stop-all');
   if (btn) btn.disabled = true;
-  try { await post('/api/workspace/stop-all'); } catch(e) { console.warn(e); }
-  await load();
+  const r = await post('/api/workspace/stop-all');
+  await refresh();
   if (btn) btn.disabled = false;
 }
 
@@ -141,14 +180,23 @@ function setBusy(id, busy) {
 }
 
 // ── Logs ──────────────────────────────────────────────────────────────────────
-async function showLogs(id) {
+function openLogsPanel(id, initialText) {
   _logsId = id;
   const lab = _labs.find(l => l.id === id);
   document.getElementById('logs-title').textContent = `Logs — ${lab?.name ?? id}`;
-  document.getElementById('logs-content').textContent = 'Cargando…';
+  document.getElementById('logs-content').textContent = initialText || 'Cargando…';
   document.getElementById('logs-panel').classList.add('open');
   document.getElementById('logs-overlay').classList.add('open');
-  await fetchLogs(id);
+}
+
+function appendLog(text) {
+  const el = document.getElementById('logs-content');
+  if (el.textContent === 'Cargando…' || el.textContent === 'Iniciando…' || el.textContent === 'Deteniendo…') {
+    el.textContent = text;
+  } else {
+    el.textContent += '\n' + text;
+  }
+  el.scrollTop = el.scrollHeight;
 }
 
 async function fetchLogs(id) {
@@ -157,7 +205,7 @@ async function fetchLogs(id) {
     const d = await get(`/api/labs/${id}/logs`);
     el.textContent = d.output || '(sin output)';
   } catch {
-    el.textContent = 'API no disponible. Usa: kraft logs <nombre>';
+    el.textContent = 'API no disponible';
   }
   el.scrollTop = el.scrollHeight;
 }
@@ -168,27 +216,34 @@ function closeLogs() {
   document.getElementById('logs-overlay').classList.remove('open');
 }
 
+// ── Refresh ───────────────────────────────────────────────────────────────────
+async function refresh() {
+  await Promise.all([loadLabs(), loadStats()]);
+  if (_logsId) await fetchLogs(_logsId);
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  load();
-  setInterval(load, 10_000);
+  loadDiagnostics();
+  refresh();
+  setInterval(refresh, 10_000);
 
   document.getElementById('search-input').addEventListener('input', render);
-  document.getElementById('btn-refresh').addEventListener('click', load);
+  document.getElementById('btn-refresh').addEventListener('click', () => { loadDiagnostics(); refresh(); });
   document.getElementById('btn-stop-all').addEventListener('click', stopAll);
   document.getElementById('logs-close').addEventListener('click', closeLogs);
   document.getElementById('logs-overlay').addEventListener('click', closeLogs);
   document.getElementById('btn-logs-refresh').addEventListener('click', () => { if (_logsId) fetchLogs(_logsId); });
 
   document.getElementById('labs').addEventListener('click', async e => {
-    const btn = e.target.closest('[data-id]');
     const url = e.target.closest('[data-url]');
     if (url) { window.open(url.dataset.url, '_blank'); return; }
+    const btn = e.target.closest('[data-id]');
     if (!btn) return;
     const id = btn.dataset.id;
-    if (btn.classList.contains('btn-start')) await start(id);
-    if (btn.classList.contains('btn-stop'))  await stop(id);
-    if (btn.classList.contains('btn-logs'))  await showLogs(id);
+    if (btn.classList.contains('btn-start')) await startLab(id);
+    if (btn.classList.contains('btn-stop'))  await stopLab(id);
+    if (btn.classList.contains('btn-logs'))  { openLogsPanel(id); await fetchLogs(id); }
   });
 });
 
