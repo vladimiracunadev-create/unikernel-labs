@@ -1,34 +1,45 @@
-# RUNBOOK
+# 🛠️ RUNBOOK — Unikernel Control Center v1
 
-## Flujo operativo recomendado
+> Guía operativa del día a día para levantar, monitorear y detener labs unikernel desde Windows.
+> Para el setup inicial, consulta [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md).
 
-### 1. Validar WSL
+---
+
+## 🩺 1 · Validar WSL antes de operar
 
 ```powershell
 wsl.exe -d Ubuntu -- bash -lc "source ~/.profile; cd /mnt/c/dev/unikernel-labs && bash scripts/doctor.sh"
 ```
 
-### 2. Levantar el dashboard local
+Debes ver:
+
+- ✅ `/dev/kvm` existe
+- ✅ `kraft version` responde
+- ✅ `qemu-system-x86_64` instalado
+
+---
+
+## 🖥️ 2 · Levantar el dashboard local
 
 ```powershell
 cd C:\dev\unikernel-labs
 node dashboard-server/server.js
 ```
 
-Abrir:
+Abre → **[http://localhost:9091](http://localhost:9091)**
 
-```text
-http://localhost:9091
-```
+---
 
-### 3. Iniciar un lab desde la API del dashboard
+## ▶️ 3 · Iniciar un lab desde la API
 
 ```powershell
 $headers = @{ 'X-UCC-Request'='1'; 'Origin'='http://127.0.0.1:9091' }
 Invoke-RestMethod -Method Post -Headers $headers http://127.0.0.1:9091/api/labs/02/start
 ```
 
-### 4. Verificar el servicio real
+---
+
+## ✅ 4 · Verificar el servicio real
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:9091/api/labs/02/health
@@ -37,9 +48,21 @@ Invoke-WebRequest http://127.0.0.1:8080 -UseBasicParsing
 
 ---
 
-## Nombres de instancia
+## 📡 Puertos
 
-| Lab | Nombre de instancia |
+| Servicio | Puerto | URL |
+|---|---:|---|
+| 🖥️ Dashboard + API | 9091 | http://localhost:9091 |
+| 🌐 nginx | 8080 | http://localhost:8080 |
+| 🐍 python | 8081 | http://localhost:8081 |
+| 🟢 node | 8082 | http://localhost:8082 |
+| 🗄️ redis | 6379 | redis://localhost:6379 |
+
+---
+
+## 🏷️ Nombres de instancia
+
+| Lab | Instancia kraft |
 |---|---|
 | hello-world | `ukl-hello` |
 | nginx-runtime | `ukl-nginx` |
@@ -49,27 +72,15 @@ Invoke-WebRequest http://127.0.0.1:8080 -UseBasicParsing
 
 ---
 
-## Puertos
+## ⚡ Comandos rápidos (dentro de WSL)
 
-| Servicio | Puerto |
-|---|---:|
-| dashboard local + API | 9091 |
-| nginx | 8080 |
-| python | 8081 |
-| node | 8082 |
-| redis | 6379 |
-
----
-
-## Comandos rapidos
-
-### Estado
+### Estado general
 
 ```bash
 kraft ps
 ```
 
-### Logs
+### Logs por servicio
 
 ```bash
 kraft logs ukl-nginx
@@ -78,7 +89,7 @@ kraft logs ukl-node
 kraft logs ukl-redis
 ```
 
-### Detener
+### Detener servicios
 
 ```bash
 kraft stop ukl-nginx
@@ -87,32 +98,39 @@ kraft stop ukl-node
 kraft stop ukl-redis
 ```
 
-### Verificacion automatizada
+### Verificación automatizada (desde Windows)
 
 ```powershell
-# desde la raiz del repo
+# desde la raíz del repo
 node scripts/verify-localhost.js
+# o
+make test-dashboard
 ```
 
 ---
 
-## Uso desde la app Windows
+## 🪟 Uso desde la app Windows
 
-- iniciar `UnikernelLabs.Launcher.exe`
-- seleccionar distro WSL
-- indicar path Linux del repo
-- elegir lab
-- usar `Start`, `Stop`, `Logs`, `Health`, `Open` y `Status`
+1. Inicia `UnikernelLabs.Launcher.exe`
+2. Selecciona distro WSL (autodetectada)
+3. Indica el path Linux del repo (ej. `/mnt/c/dev/unikernel-labs`)
+4. Elige un lab de la grilla
+5. Usa `Start` · `Stop` · `Logs` · `Health` · `Open` · `Status`
 
-El launcher usa el mismo modelo de `localhost` que el dashboard.
+> [!NOTE]
+> El launcher usa el mismo modelo de `localhost` que el dashboard. No son implementaciones desconectadas.
 
 ---
 
-## Criterio operativo
+## 🏗️ Criterio operativo
 
-- Windows es la capa de UX
-- WSL2 es la capa tecnica
-- `kraft`, QEMU y `iptables` viven en Linux
-- los servicios deben exponerse en puertos fijos
-- el catalogo fuente vive en `labs.config.json`
-- el catalogo del launcher se genera desde ese archivo
+| Capa | Responsabilidad |
+|---|---|
+| 🪟 Windows | Capa de UX (dashboard, launcher) |
+| 🐧 WSL2 | Capa técnica (kraft, QEMU, iptables) |
+| 🌐 localhost | Superficie de servicios expuestos |
+| 📋 `labs.config.json` | Fuente de verdad del catálogo |
+
+---
+
+📖 Ver también: [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [docs/04-windows-localhost-launcher.md](docs/04-windows-localhost-launcher.md)

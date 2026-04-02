@@ -1,308 +1,255 @@
-# unikernel-labs
+# 🪂 unikernel-labs
 
 ![Unikernel Control Center v1](assets/branding/cover-v7.svg)
 
-> **Unikernel Control Center v1**
-> Suite local para levantar y gobernar servicios unikernel desde Windows, usando WSL2 como backend Linux y `localhost` como superficie operativa.
+> **Unikernel Control Center v1** — Suite local para levantar y gobernar servicios unikernel desde Windows,
+> usando WSL2 como backend Linux y `localhost` como superficie operativa.
 
-![Build](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/dotnet-launcher.yml?branch=main&label=build)
-![Tests](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/dotnet-launcher.yml?branch=main&label=tests)
-![Installer](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/build-windows-installer.yml?branch=main&label=installer)
-![Release](https://img.shields.io/github/v/release/vladimiracunadev-create/unikernel-labs?label=release)
-![Status](https://img.shields.io/badge/status-v1-blue)
-![Mode](https://img.shields.io/badge/mode-Windows%20%2B%20WSL2%20%2B%20localhost-orange)
-![License](https://img.shields.io/badge/license-Apache--2.0-green)
+[![Build](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/dotnet-launcher.yml?branch=main&label=build&logo=github)](https://github.com/vladimiracunadev-create/unikernel-labs/actions)
+[![Tests](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/dotnet-launcher.yml?branch=main&label=tests&logo=dotnet)](https://github.com/vladimiracunadev-create/unikernel-labs/actions)
+[![Installer](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/build-windows-installer.yml?branch=main&label=installer&logo=windows)](https://github.com/vladimiracunadev-create/unikernel-labs/actions)
+[![Release](https://img.shields.io/github/v/release/vladimiracunadev-create/unikernel-labs?label=release&logo=github)](https://github.com/vladimiracunadev-create/unikernel-labs/releases)
+[![Status](https://img.shields.io/badge/status-v1-blue?logo=checkmarx)](https://github.com/vladimiracunadev-create/unikernel-labs)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%2B%20WSL2-orange?logo=windows)](docs/00-windows-and-wsl2.md)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green?logo=apache)](LICENSE)
 
 ---
 
-## Que es este repo
+## 🗺️ Qué es este repo
 
 Este repo junta tres piezas que trabajan sobre la misma idea:
 
-- un **dashboard local** en Node.js que corre en Windows y publica una API en `http://localhost:9091`
-- una **aplicacion de escritorio WinForms** para Windows
-- un conjunto de **labs unikernel** que se ejecutan dentro de WSL2 usando `kraft` y QEMU/KVM
+| Pieza | Descripción |
+|---|---|
+| 🖥️ **Dashboard local** | API REST en Node.js, corre en Windows, publica en `http://localhost:9091` |
+| 🪟 **Launcher WinForms** | Aplicación de escritorio Windows para gobernar labs |
+| 🐧 **Labs unikernel** | Se ejecutan dentro de WSL2 usando `kraft` + QEMU/KVM |
 
-La arquitectura correcta es esta:
+### Arquitectura
 
 ```text
-[ Navegador o app Windows ]
-            |
-            v
-[ dashboard-server/server.js o launcher WinForms ]
-            |
-            v
-[ wsl.exe -> Ubuntu/Debian ]
-            |
-            v
-[ kraft + QEMU/KVM + iptables ]
-            |
-            v
-[ servicios publicados en localhost ]
+🪟  [ Navegador o app Windows ]
+              │
+              ▼
+⚙️  [ dashboard-server/server.js  ·  launcher WinForms ]
+              │
+              ▼
+🐧  [ wsl.exe → Ubuntu/Debian ]
+              │
+              ▼
+⚡  [ kraft + QEMU/KVM + iptables ]
+              │
+              ▼
+🌐  [ servicios publicados en localhost ]
 ```
 
-No es un dashboard estatico. No es un runtime Windows nativo para `kraft`. Es una capa de control Windows sobre un runtime Linux real.
-GitHub Pages no forma parte del producto ni del flujo soportado: el dashboard es local y la superficie adicional soportada es la aplicacion Windows.
+> [!NOTE]
+> No es un dashboard estático ni un runtime Windows nativo para `kraft`.
+> Es una **capa de control Windows** sobre un runtime Linux real.
 
 ---
 
-## Estado actual
+## ✅ Estado actual — v1 validado
 
-Lo que hoy esta implementado y documentado en este repo:
+Lo que hoy está implementado y documentado:
 
-- dashboard local con REST API en `localhost:9091`
-- diagnostico de WSL, distro y version de `kraft`
-- start, stop, logs y health por lab
-- catalogo raiz en `labs.config.json`
-- catalogo del launcher generado desde ese catalogo raiz
-- scripts para sincronizar catalogo y verificar el flujo localhost
-- launcher WinForms que consume el mismo set de labs
-- script y workflow para generar un instalador `.exe` de Windows
-- sin despliegue a GitHub Pages
-
-Lo que se valido durante esta iteracion:
-
-- arranque del dashboard en Windows
-- deteccion de `Ubuntu` en WSL2
-- instalacion de `kraft` dentro de WSL
-- instalacion de dependencias de runtime (`qemu-system`, `iptables`, etc.)
-- arranque real de `nginx-runtime`
-- respuesta real en `http://localhost:8080`
-- build real del instalador Windows
-- instalacion silenciosa real del instalador
-- arranque real del launcher instalado y desinstalacion de verificacion
+- ✅ Dashboard local con REST API en `localhost:9091`
+- ✅ Diagnóstico de WSL, distro y versión de `kraft`
+- ✅ Start, Stop, Logs y Health por lab
+- ✅ Catálogo raíz en `labs.config.json`
+- ✅ Scripts para sincronizar catálogo y verificar flujo localhost
+- ✅ Launcher WinForms que consume el mismo set de labs
+- ✅ Script y workflow para generar un instalador `.exe` de Windows
+- ✅ Arranque real de `nginx-runtime` con respuesta en `http://localhost:8080`
+- ✅ Build e instalación silenciosa del instalador
 
 ---
 
-## Fuente de verdad del catalogo
+## 📚 Fuente de verdad del catálogo
 
-El catalogo operativo principal es:
+El catálogo operativo principal es `labs.config.json`.
 
-- `labs.config.json`
-
-El launcher usa:
-
-- `launcher/windows/src/UnikernelLabs.Launcher/labs.windows.json`
-
-Ese archivo del launcher **ya no se debe editar a mano**. Se genera desde el catalogo raiz con:
+El launcher usa `launcher/windows/src/UnikernelLabs.Launcher/labs.windows.json`, que **se genera automáticamente**:
 
 ```powershell
-# desde la raiz del repo
+# desde la raíz del repo
 node scripts/sync-launcher-catalog.js
 ```
 
-Si agregas o cambias labs, actualiza `labs.config.json` primero y luego sincroniza el catalogo del launcher.
+> [!IMPORTANT]
+> No edites `labs.windows.json` a mano. Siempre edita `labs.config.json` y luego sincroniza.
 
 ---
 
-## Componentes principales
+## 🧩 Componentes principales
 
-| Componente | Rol |
-|---|---|
-| `dashboard-server/server.js` | API local + puente entre Windows y WSL |
-| `index.html`, `dashboard.js`, `dashboard.css` | UI web del dashboard |
-| `labs.config.json` | catalogo raiz de servicios |
-| `scripts/sync-launcher-catalog.js` | genera el catalogo del launcher |
-| `scripts/verify-localhost.js` | smoke test del flujo localhost |
-| `launcher/windows/src/UnikernelLabs.Launcher/` | app WinForms de escritorio |
-| `01-hello-world` a `08-kraft-cloud-track` | labs y pistas de trabajo |
-| `windows/scripts/` | helpers de entorno y operacion desde Windows |
+| Componente | Rol | Doc |
+|---|---|---|
+| `dashboard-server/server.js` | API local + puente Windows ↔ WSL | [docs/04](docs/04-windows-localhost-launcher.md) |
+| `index.html` + `dashboard.js` + `dashboard.css` | UI web del dashboard | — |
+| `labs.config.json` | Catálogo raíz de servicios | — |
+| `scripts/sync-launcher-catalog.js` | Genera catálogo del launcher | [CONTRIBUTING](CONTRIBUTING.md) |
+| `scripts/verify-localhost.js` | Smoke test del flujo localhost | [RUNBOOK](RUNBOOK.md) |
+| `launcher/windows/src/UnikernelLabs.Launcher/` | App WinForms de escritorio | [launcher/README](launcher/README.md) |
+| `01-hello-world` → `08-kraft-cloud-track` | Labs y pistas de trabajo | [docs/03](docs/03-lab-selection.md) |
+| `windows/scripts/` | Helpers de entorno desde Windows | [windows/README](windows/README.md) |
 
 ---
 
-## Quickstart recomendado
+## 🚀 Quickstart
 
-### 1. Preparar Windows + WSL
+### 1 · Preparar Windows + WSL
 
-Instala una distro WSL2, por ejemplo `Ubuntu`.
-
-Si quieres la experiencia mas directa para Windows, deja el repo en:
-
-```text
-C:\dev\unikernel-labs
+```powershell
+wsl --install -d Ubuntu
 ```
 
-Desde WSL, esa ruta sera:
+Deja el repo en `C:\dev\unikernel-labs` para el flujo validado:
 
-```text
-/mnt/c/dev/unikernel-labs
+```powershell
+git clone https://github.com/vladimiracunadev-create/unikernel-labs C:\dev\unikernel-labs
 ```
 
-Esa topologia fue la usada para validar el flujo actual del dashboard localhost.
-
-### 2. Instalar dependencias base en Ubuntu
-
-Desde PowerShell:
+### 2 · Instalar dependencias en Ubuntu
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\windows\scripts\install-runtime-prereqs.ps1 -Distro Ubuntu
-```
-
-Luego instala las dependencias de runtime faltantes como `root` en WSL:
-
-```powershell
 wsl.exe -u root -d Ubuntu -- bash -lc "apt-get update && apt-get install -y --no-install-recommends bison build-essential flex git libncurses-dev qemu-system socat unzip wget iptables"
 ```
 
-### 3. Instalar KraftKit dentro de WSL
-
-Si el repo esta en `C:\dev\unikernel-labs`:
+### 3 · Instalar KraftKit
 
 ```powershell
 wsl.exe -d Ubuntu -- bash /mnt/c/dev/unikernel-labs/scripts/install-kraft-wsl.sh
 ```
 
-Si el repo esta en una ruta Linux, ejecuta el mismo script desde esa ruta Linux.
-
-### 4. Validar el entorno
+### 4 · Validar el entorno
 
 ```powershell
 wsl.exe -d Ubuntu -- bash -lc "source ~/.profile; cd /mnt/c/dev/unikernel-labs && bash scripts/doctor.sh"
 ```
 
-### 5. Levantar el dashboard
+### 5 · Levantar el dashboard
 
 ```powershell
 cd C:\dev\unikernel-labs
 node dashboard-server/server.js
 ```
 
-Abre:
+Abre → **[http://localhost:9091](http://localhost:9091)**
 
-```text
-http://localhost:9091
-```
-
-### 6. Probar un lab real
-
-Puedes iniciar `nginx-runtime` desde la UI o por API:
+### 6 · Probar un lab real
 
 ```powershell
 $headers = @{ 'X-UCC-Request'='1'; 'Origin'='http://127.0.0.1:9091' }
 Invoke-RestMethod -Method Post -Headers $headers http://127.0.0.1:9091/api/labs/02/start
-```
-
-Luego verifica:
-
-```powershell
 Invoke-RestMethod http://127.0.0.1:9091/api/labs/02/health
 Invoke-WebRequest http://127.0.0.1:8080 -UseBasicParsing
 ```
 
----
-
-## Servicios localhost
-
-| Servicio | Puerto host | URL |
-|---|---:|---|
-| Dashboard local + API | 9091 | http://localhost:9091 |
-| NGINX unikernel | 8080 | http://localhost:8080 |
-| Python HTTP | 8081 | http://localhost:8081 |
-| Node HTTP | 8082 | http://localhost:8082 |
-| Redis | 6379 | redis://localhost:6379 |
+> [!TIP]
+> Consulta [`ENVIRONMENT_SETUP.md`](ENVIRONMENT_SETUP.md) para un walkthrough paso a paso completo.
 
 ---
 
-## Launcher Windows
+## 🌐 Servicios localhost
 
-Ruta:
+| Servicio | Puerto | URL | Protocolo |
+|---|---:|---|---|
+| 🖥️ Dashboard local + API | 9091 | [localhost:9091](http://localhost:9091) | HTTP |
+| 🌐 NGINX unikernel | 8080 | [localhost:8080](http://localhost:8080) | HTTP |
+| 🐍 Python HTTP | 8081 | [localhost:8081](http://localhost:8081) | HTTP |
+| 🟢 Node HTTP | 8082 | [localhost:8082](http://localhost:8082) | HTTP |
+| 🗄️ Redis | 6379 | redis://localhost:6379 | TCP |
+
+---
+
+## 🪟 Launcher Windows
 
 ```text
 launcher/windows/src/UnikernelLabs.Launcher
 ```
 
-La app de escritorio:
+La app de escritorio permite: `Start` · `Stop` · `Logs` · `Health` · `Open` · `Status` · autodetección de distros WSL.
 
-- usa `wsl.exe` para ejecutar comandos reales dentro de WSL
-- comparte el mismo modelo de `localhost`
-- consume `labs.windows.json`, que ahora se genera desde `labs.config.json`
-- permite `Start`, `Stop`, `Logs`, `Health`, `Open`, `Status` y autodeteccion
-
-Para publicarla:
+Para publicar:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\windows\scripts\build-windows-installer.ps1
 ```
 
-El flujo genera:
+Artefactos generados:
 
-- `artifacts/publish/win-x64/UnikernelLabs.Launcher.exe`
-- `artifacts/installer/UnikernelControlCenter-1.0.0-win-x64-setup.exe`
-
-Tambien puedes verificar solo el instalador ya generado con:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\windows\scripts\verify-windows-installer.ps1 `
-  -InstallerPath .\artifacts\installer\UnikernelControlCenter-1.0.0-win-x64-setup.exe
+```text
+artifacts/publish/win-x64/UnikernelLabs.Launcher.exe
+artifacts/installer/UnikernelControlCenter-1.0.0-win-x64-setup.exe
 ```
 
-Consulta tambien:
-
-- `windows/PUBLISH_AND_INSTALL.md`
-- `launcher/README.md`
-- `docs/04-windows-localhost-launcher.md`
-- `docs/05-packaging-and-publish.md`
+📖 Más info → [`docs/05-packaging-and-publish.md`](docs/05-packaging-and-publish.md) · [`windows/PUBLISH_AND_INSTALL.md`](windows/PUBLISH_AND_INSTALL.md)
 
 ---
 
-## Verificacion automatizada
-
-Para validar el flujo localhost y la sincronizacion del catalogo:
+## 🧪 Verificación automatizada
 
 ```powershell
-# desde la raiz del repo
 node scripts/verify-localhost.js
-```
-
-o:
-
-```bash
+# o
 make test-dashboard
 ```
 
-Ese verificador comprueba:
+El verificador comprueba:
 
-- resolucion segura de archivos estaticos
-- truncado de logs
-- sincronizacion entre `labs.config.json` y `labs.windows.json`
-- smoke test de la API localhost
-
----
-
-## Lo que esta v1 si promete
-
-- control local de servicios unikernel desde Windows
-- backend real en WSL2
-- puertos estables en `localhost`
-- lectura de logs
-- health checks basicos por protocolo
-- instalador `.exe` para la app Windows
-- una base util para evolucionar hacia una experiencia de escritorio mas madura
-
-## Lo que esta v1 no promete
-
-- runtime Windows nativo para `kraft`
-- reemplazo completo de Docker Desktop
-- MSI firmado o auto-actualizacion del launcher
-- soporte uniforme para cualquier lab o cualquier runtime
+- ✅ Resolución segura de archivos estáticos
+- ✅ Truncado de logs
+- ✅ Sincronización entre `labs.config.json` y `labs.windows.json`
+- ✅ Smoke test de la API localhost
 
 ---
 
-## Documentos clave
+## 🧪 Labs disponibles
 
-- `RUNBOOK.md`
-- `ENVIRONMENT_SETUP.md`
-- `COMPATIBILITY.md`
-- `CONTRIBUTING.md`
-- `windows/README.md`
-- `windows/PUBLISH_AND_INSTALL.md`
-- `launcher/README.md`
-- `docs/00-windows-and-wsl2.md`
-- `docs/04-windows-localhost-launcher.md`
-- `docs/05-packaging-and-publish.md`
+| # | Lab | Estado | Puerto |
+|---|---|---|---:|
+| 01 | [hello-world](01-hello-world/README.md) | ✅ ready | — |
+| 02 | [nginx-runtime](02-nginx-runtime/README.md) | ✅ validado | 8080 |
+| 03 | [python-http](03-python-http/README.md) | ✅ ready | 8081 |
+| 04 | [node-http](04-node-http/README.md) | ✅ ready | 8082 |
+| 05 | [redis-runtime](05-redis-runtime/README.md) | ✅ ready | 6379 |
+| 06 | [benchmarks](06-benchmarks/README.md) | ⏳ pista | — |
+| 07 | [runu-track](07-runu-track/README.md) | ⏳ pista | — |
+| 08 | [kraft-cloud-track](08-kraft-cloud-track/README.md) | ⏳ pista | — |
 
 ---
 
-## Licencia
+## 📋 Lo que v1 promete · y lo que no
 
-Apache-2.0
+| ✅ Prometido | ❌ Fuera de alcance |
+|---|---|
+| Control local de servicios unikernel desde Windows | Runtime Windows nativo para `kraft` |
+| Backend real en WSL2 | Reemplazo completo de Docker Desktop |
+| Puertos estables en `localhost` | MSI firmado o auto-actualización |
+| Lectura de logs y health checks básicos | Soporte uniforme para cualquier lab |
+| Instalador `.exe` para la app Windows | — |
+
+---
+
+## 📖 Documentación clave
+
+| Documento | Descripción |
+|---|---|
+| [RUNBOOK.md](RUNBOOK.md) | Comandos operativos del día a día |
+| [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md) | Setup completo paso a paso |
+| [COMPATIBILITY.md](COMPATIBILITY.md) | Plataformas soportadas y riesgos |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Cómo contribuir al proyecto |
+| [ROADMAP.md](ROADMAP.md) | Versiones y features planeadas |
+| [FILE_ARCHITECTURE.md](FILE_ARCHITECTURE.md) | Árbol de archivos comentado |
+| [docs/00-windows-and-wsl2.md](docs/00-windows-and-wsl2.md) | Modelo Windows + WSL2 |
+| [docs/04-windows-localhost-launcher.md](docs/04-windows-localhost-launcher.md) | Launcher architecture |
+| [docs/05-packaging-and-publish.md](docs/05-packaging-and-publish.md) | Empaquetado e instalador |
+| [RECRUITER.md](RECRUITER.md) | Para recruiters / hiring managers |
+
+---
+
+## ⚖️ Licencia
+
+Apache-2.0 · © vladimiracunadev-create

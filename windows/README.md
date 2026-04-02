@@ -1,83 +1,70 @@
-# Windows
+# 🪟 Windows — Unikernel Control Center v1
 
-Este directorio documenta la capa Windows de **Unikernel Control Center v1**.
+> Scripts, herramientas y guías para la capa Windows de la suite.
+> Para el setup completo → [ENVIRONMENT_SETUP.md](../ENVIRONMENT_SETUP.md)
 
-## Rol real de Windows
+---
 
-Windows no es el runtime de los unikernels.
+## 🎯 Rol real de Windows en esta suite
 
-Windows aporta:
+Windows **no es** el runtime de los unikernels.
 
-- dashboard local en Node.js
-- app de escritorio WinForms
-- automatizacion PowerShell
-- apertura de `localhost`
-- publicacion del `.exe`
-- build de un instalador `.exe` con Inno Setup
+| Windows aporta | Runtime real (en WSL2) |
+|---|---|
+| 🖥️ Dashboard local (Node.js) | ⚡ `kraft` + QEMU/KVM |
+| 🪟 App de escritorio WinForms | 🐧 Ubuntu o Debian |
+| ⚙️ Automatización PowerShell | 🔒 `iptables` |
+| 🌐 Apertura de `localhost` | 🖥️ `/dev/kvm` |
+| 📦 Instalador `.exe` (Inno Setup) | — |
 
-No aporta ni necesita una publicacion del dashboard en GitHub Pages.
+---
 
-El runtime real sigue estando en:
+## ⚙️ Scripts disponibles
 
-- WSL2
-- Ubuntu o Debian
-- `kraft`
-- QEMU/KVM
-- `iptables`
+| Script | Propósito |
+|---|---|
+| `install-wsl-debian.ps1` | Instala una distro WSL (Ubuntu/Debian) |
+| `install-runtime-prereqs.ps1` | Instala dependencias base de runtime en WSL |
+| `doctor-windows.ps1` | Diagnóstico de entorno desde Windows |
+| `detect-wsl-context.ps1` | Detecta distros WSL disponibles |
+| `start-lab.ps1` | Inicia un lab por ID |
+| `stop-lab.ps1` | Detiene un lab por ID |
+| `logs-lab.ps1` | Muestra logs de un lab |
+| `status-labs.ps1` | Estado de todos los labs |
+| `health-lab.ps1` | Health check de un lab |
+| `open-lab.ps1` | Abre la URL de un lab en el navegador |
+| `publish-launcher.ps1` | Publica el launcher como `.exe` portable |
+| `build-windows-installer.ps1` | Build completo: sync + tests + publish + Inno Setup |
+| `verify-windows-installer.ps1` | Verifica un instalador ya generado |
+| `resolve-dotnet.ps1` | Detecta .NET SDK disponible |
+| `install-inno-setup.ps1` | Instala Inno Setup si no está disponible |
 
-## Flujo recomendado hoy
+---
 
-1. preparar WSL2
-2. instalar dependencias base con `windows/scripts/install-runtime-prereqs.ps1`
-3. instalar `kraft` dentro de WSL con `scripts/install-kraft-wsl.sh`
-4. validar el entorno con `doctor-windows.ps1` o `scripts/doctor.sh`
-5. levantar el dashboard local en `http://localhost:9091`
-6. usar el launcher como superficie desktop sobre el mismo backend
+## 🔄 Flujo recomendado
 
-## Scripts principales
+1. 🪟 Preparar WSL2 con `install-runtime-prereqs.ps1`
+2. ⚡ Instalar `kraft` con `scripts/install-kraft-wsl.sh`
+3. 🩺 Validar con `doctor-windows.ps1` o `scripts/doctor.sh`
+4. 🖥️ Levantar el dashboard en `http://localhost:9091`
+5. 🪟 Usar el launcher sobre el mismo backend
 
-- `scripts/install-wsl-debian.ps1`
-- `scripts/install-runtime-prereqs.ps1`
-- `scripts/doctor-windows.ps1`
-- `scripts/detect-wsl-context.ps1`
-- `scripts/start-lab.ps1`
-- `scripts/stop-lab.ps1`
-- `scripts/logs-lab.ps1`
-- `scripts/status-labs.ps1`
-- `scripts/health-lab.ps1`
-- `scripts/open-lab.ps1`
-- `scripts/publish-launcher.ps1`
-- `scripts/build-windows-installer.ps1`
-- `scripts/verify-windows-installer.ps1`
-- `scripts/resolve-dotnet.ps1`
-- `scripts/install-inno-setup.ps1`
+---
 
-## Nota sobre el catalogo
+## 📋 Nota sobre el catálogo
 
-La fuente de verdad del catalogo esta en:
+| Archivo | Rol | Editable |
+|---|---|---|
+| `../labs.config.json` | Fuente de verdad | ✅ Aquí |
+| `../launcher/windows/src/UnikernelLabs.Launcher/labs.windows.json` | Catálogo del launcher | ❌ Generado |
 
-```text
-../labs.config.json
-```
-
-El launcher usa una copia generada en:
-
-```text
-../launcher/windows/src/UnikernelLabs.Launcher/labs.windows.json
-```
-
-Sincronizala con:
+Sincroniza con:
 
 ```powershell
-# desde la raiz del repo
+# desde la raíz del repo
 node scripts/sync-launcher-catalog.js
 ```
 
-## Guia rapida
+---
 
-Consulta:
-
-- `PUBLISH_AND_INSTALL.md`
-- `../ENVIRONMENT_SETUP.md`
-- `../docs/04-windows-localhost-launcher.md`
-- `../docs/05-packaging-and-publish.md`
+📖 Ver también: [PUBLISH_AND_INSTALL.md](PUBLISH_AND_INSTALL.md) · [ENVIRONMENT_SETUP.md](../ENVIRONMENT_SETUP.md) · [docs/04-windows-localhost-launcher.md](../docs/04-windows-localhost-launcher.md) · [docs/05-packaging-and-publish.md](../docs/05-packaging-and-publish.md)

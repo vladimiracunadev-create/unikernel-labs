@@ -1,66 +1,83 @@
-# Windows localhost launcher
+# 🪟🚀 Windows localhost launcher — Arquitectura
 
-## Objetivo
+> Cómo funciona el launcher WinForms y su relación con el dashboard.
+> Para empaquetar y publicar → [05-packaging-and-publish.md](05-packaging-and-publish.md)
 
-Convertir el laboratorio en una suite local Windows creible, sin fingir que el runtime unikernel corre como proceso nativo de Windows.
+---
 
-## Arquitectura
+## 🎯 Objetivo
+
+Convertir el laboratorio en una **suite local Windows creíble** sin fingir
+que el runtime unikernel corre como proceso nativo de Windows.
+
+---
+
+## 🏗️ Arquitectura
 
 ```text
-[Usuario]
-   |
-   v
-[Launcher Windows .exe]
-   |
-   v
-[wsl.exe]
-   |
-   v
-[Ubuntu o Debian en WSL2]
-   |
-   v
-[kraft + QEMU/KVM + iptables]
-   |
-   v
-[servicio unikernel]
-   |
-   v
-[localhost:<puerto>]
+👤  [Usuario]
+       │
+       ▼
+🪟  [Launcher Windows .exe]
+       │  wsl.exe
+       ▼
+🐧  [Ubuntu o Debian en WSL2]
+       │  kraft + QEMU/KVM + iptables
+       ▼
+⚡  [Servicio unikernel]
+       │
+       ▼
+🌐  [localhost:<puerto>]
 ```
 
-## Responsabilidades del launcher
+---
 
-- autodetectar distro WSL
-- autodetectar o pedir path Linux del repo
-- leer el catalogo generado del launcher
-- iniciar servicios
-- detener servicios
-- consultar logs
-- abrir URLs
-- mostrar salida operativa
-- verificar salud HTTP/TCP/Redis
+## 📋 Responsabilidades del launcher
 
-## Relacion con el dashboard
+| Función | Descripción |
+|---|---|
+| 🔍 Autodetección | Detecta distros WSL disponibles al iniciar |
+| 📁 Configuración | Pide o autodetecta el path Linux del repo |
+| 📋 Catálogo | Lee `labs.windows.json` (generado desde `labs.config.json`) |
+| ▶️ Start | Inicia el servicio en WSL |
+| ⏹️ Stop | Detiene el servicio en WSL |
+| 📄 Logs | Muestra salida de `kraft logs` |
+| 🌐 Open | Abre la URL del servicio en el navegador |
+| 🩺 Health | Verifica salud HTTP/TCP/Redis según protocolo |
+| 📊 Status | Muestra estado visual por servicio |
 
-El launcher no es una implementacion paralela desconectada.
+---
 
-Debe seguir:
+## 🔗 Relación con el dashboard
 
-- el mismo catalogo fuente (`labs.config.json`)
-- la misma topologia localhost
-- la misma idea de `Start / Stop / Logs / Health / Open`
+> [!NOTE]
+> El launcher **no es** una implementación paralela desconectada.
+> Comparte exactamente el mismo modelo que el dashboard local.
 
-El dashboard sigue siendo local. No forma parte de una estrategia de publicacion en GitHub Pages.
+| Aspecto | Dashboard (`server.js`) | Launcher (WinForms) |
+|---|---|---|
+| Catálogo fuente | `labs.config.json` | `labs.windows.json` (generado) |
+| Topología | localhost | localhost |
+| Acciones | start / stop / logs / health | start / stop / logs / health / open |
+| Interfaz | Web (HTML/JS) | Desktop (WinForms) |
 
-## Que no hace
+---
 
-- no reemplaza `kraft`
-- no elimina WSL2
-- no empaqueta por si solo los unikernels
-- no garantiza compatibilidad universal con cualquier lab
+## ❌ Qué no hace el launcher
 
-## Posicionamiento correcto
+- No reemplaza `kraft`
+- No elimina WSL2
+- No empaqueta por sí solo los unikernels
+- No garantiza compatibilidad universal con cualquier lab
+
+---
+
+## 🎯 Posicionamiento correcto
 
 El launcher es la superficie desktop de **Unikernel Control Center v1**.
 
-No debe venderse todavia como un "Unikernel Desktop" completo.
+> No debe venderse todavía como un "Unikernel Desktop" completo.
+
+---
+
+📖 Ver también: [05-packaging-and-publish.md](05-packaging-and-publish.md) · [RUNBOOK.md](../RUNBOOK.md) · [00-windows-and-wsl2.md](00-windows-and-wsl2.md)

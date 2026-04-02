@@ -1,36 +1,54 @@
-# Seleccion de labs
+# 🧪 Selección de labs — Estado de validación
 
-## Primera ola
+> Qué labs están listos para usar, cuáles son pistas de exploración y qué evitar al empezar.
 
-- hello-world
-- nginx-runtime
-- python-http
-- node-http
-- redis-runtime
+---
 
-## Estado de validacion actual
+## 🟢 Primera ola — Labs operativos
 
-En esta iteracion quedo validado end-to-end:
+| # | Lab | Estado | Puerto | Instancia |
+|---|---|---|---:|---|
+| 01 | [hello-world](../01-hello-world/README.md) | ✅ ready | — | `ukl-hello` |
+| 02 | [nginx-runtime](../02-nginx-runtime/README.md) | ✅ validado end-to-end | 8080 | `ukl-nginx` |
+| 03 | [python-http](../03-python-http/README.md) | ✅ ready | 8081 | `ukl-python` |
+| 04 | [node-http](../04-node-http/README.md) | ✅ ready | 8082 | `ukl-node` |
+| 05 | [redis-runtime](../05-redis-runtime/README.md) | ✅ ready | 6379 | `ukl-redis` |
 
-- dashboard localhost en `:9091`
-- `nginx-runtime` en `:8080`
+---
 
-Los demas labs siguen en el catalogo y deben verificarse con el mismo flujo:
+## 🏅 Validado end-to-end en esta iteración
 
-1. diagnostico WSL
-2. start desde dashboard o launcher
-3. health por API
-4. validacion directa en `localhost`
+- ✅ Dashboard localhost en `:9091`
+- ✅ `nginx-runtime` en `:8080` con respuesta HTTP real
 
-## Segunda ola
+Los demás labs siguen en el catálogo y deben verificarse con el mismo flujo:
 
-- benchmarks formales
-- `runu`
-- `kraft cloud`
-- rootfs personalizados
+1. 🩺 Diagnóstico WSL (`scripts/doctor.sh`)
+2. ▶️ Start desde dashboard o launcher
+3. ✅ Health por API (`/api/labs/NN/health`)
+4. 🌐 Validación directa en `localhost:<puerto>`
 
-## No partir por aqui
+---
 
-- ecosistemas multi-servicio complejos
-- equivalentes exactos de Docker Compose
-- features Windows nativas que salten WSL
+## 🔮 Segunda ola — Pistas de exploración
+
+| # | Pista | Doc |
+|---|---|---|
+| 06 | Benchmarks formales | [06-benchmarks/README.md](../06-benchmarks/README.md) |
+| 07 | `runu` — runtime alternativo | [07-runu-track/README.md](../07-runu-track/README.md) |
+| 08 | `kraft cloud` — despliegue cloud | [08-kraft-cloud-track/README.md](../08-kraft-cloud-track/README.md) |
+
+---
+
+## 🚫 Por dónde no empezar
+
+> [!CAUTION]
+> Estos casos no son el punto de entrada correcto para esta suite:
+
+- Ecosistemas multi-servicio complejos (eso es `docker-labs`)
+- Equivalentes exactos de Docker Compose
+- Features Windows nativas que salten WSL
+
+---
+
+📖 Ver también: [01-benchmark-strategy.md](01-benchmark-strategy.md) · [RUNBOOK.md](../RUNBOOK.md) · [ROADMAP.md](../ROADMAP.md)

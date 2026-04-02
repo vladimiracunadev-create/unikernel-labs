@@ -1,133 +1,146 @@
-# Packaging and publish
+# 📦 Packaging and Publish — Unikernel Control Center v1
 
-Esta guia aterriza como publicar **Unikernel Control Center v1** sin ocultar su arquitectura real.
+> Cómo publicar el launcher sin ocultar su arquitectura real.
+> Para contribuir → [CONTRIBUTING.md](../CONTRIBUTING.md)
 
-## 1. Que publicas
+---
 
-Publicas una app Windows que actua como panel de control.
+## 🎯 Qué publicas
+
+Publicas una app Windows que actúa como panel de control local.
 
 La cadena real es:
 
 ```text
-.exe Windows -> WSL2 -> distro Linux -> kraft -> qemu -> localhost
+📦 .exe Windows → 🐧 WSL2 → 🐧 distro Linux → ⚡ kraft → 🖥️ QEMU → 🌐 localhost
 ```
 
-## 2. Precondiciones
+---
 
-En Windows:
+## ✅ Precondiciones
 
-- WSL2 habilitado
-- una distro Linux instalada
-- Node.js si vas a usar el dashboard
-- .NET 8 SDK si vas a compilar el launcher
-- Inno Setup si vas a compilar el instalador de forma manual
+### En Windows
 
-En la distro Linux:
+| Requisito | Para qué |
+|---|---|
+| ✅ WSL2 habilitado | Backend Linux |
+| ✅ Distro Linux instalada (Ubuntu/Debian) | Runtime |
+| ✅ Node.js | Dashboard local |
+| ✅ .NET 8 SDK | Compilar el launcher |
+| ✅ Inno Setup | Compilar el instalador _(solo si es manual)_ |
 
-- `kraft`
-- `qemu-system`
-- `iptables`
-- acceso a `/dev/kvm`
-- repo accesible desde la ruta Linux configurada
+### En la distro Linux (WSL)
 
-## 3. Catalogo a empaquetar
+| Requisito | Para qué |
+|---|---|
+| ✅ `kraft` | Orquestación de unikernels |
+| ✅ `qemu-system` | Runtime de VMs |
+| ✅ `iptables` | Port-forwarding |
+| ✅ `/dev/kvm` accesible | Virtualización acelerada |
+| ✅ Repo accesible desde ruta Linux | Acceso a labs y catálogo |
+
+---
+
+## 📋 Catálogo a empaquetar
 
 El launcher incluye:
 
-- `labs.windows.json`
+- `labs.windows.json` ← generado desde `labs.config.json`
 - `logo.png`
 - `app.ico`
 
-Pero recuerda:
+> [!IMPORTANT]
+> Sincroniza siempre antes de publicar:
+>
+> ```powershell
+> node scripts/sync-launcher-catalog.js
+> ```
 
-- `labs.windows.json` se genera desde `labs.config.json`
-- no conviene editarlo a mano antes de publicar
+---
 
-Sincroniza primero:
-
-```powershell
-# desde la raiz del repo
-node scripts/sync-launcher-catalog.js
-```
-
-## 4. Verificaciones previas
-
-Antes de publicar, ejecuta:
+## 🔍 Verificaciones previas
 
 ```powershell
-# desde la raiz del repo
+# Smoke test del dashboard y catálogo
 node scripts/verify-localhost.js
-```
 
-y, si corresponde:
-
-```powershell
+# Tests del launcher
 dotnet test .\launcher\windows\src\UnikernelLabs.Launcher.Tests\UnikernelLabs.Launcher.Tests.csproj
 ```
 
-## 5. Build recomendado del instalador
+---
+
+## 🚀 Build recomendado del instalador
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\windows\scripts\build-windows-installer.ps1
 ```
 
-Ese comando:
+Este comando ejecuta automáticamente:
 
-- sincroniza `labs.windows.json`
-- corre `node scripts/verify-localhost.js`
-- corre `dotnet test`
-- publica el launcher self-contained
-- compila `windows/installer/UnikernelControlCenter.iss`
-- instala, abre y desinstala el launcher para verificar el instalador
+1. ✅ Sincroniza `labs.windows.json`
+2. ✅ Corre `verify-localhost.js`
+3. ✅ Corre `dotnet test`
+4. ✅ Publica el launcher self-contained
+5. ✅ Compila `windows/installer/UnikernelControlCenter.iss`
+6. ✅ Instala, abre y desinstala para verificar el instalador
 
-Artefactos:
+### Artefactos generados
 
 ```text
 artifacts/publish/win-x64/UnikernelLabs.Launcher.exe
 artifacts/installer/UnikernelControlCenter-1.0.0-win-x64-setup.exe
 ```
 
-## 6. Publish portable alternativo
+---
+
+## 🔧 Publish portable alternativo
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\windows\scripts\publish-launcher.ps1
 ```
 
-## 7. CI de instalador
+---
 
-El repo incluye:
+## ⚙️ CI del instalador
 
-```text
-.github/workflows/build-windows-installer.yml
-```
+El repo incluye `.github/workflows/build-windows-installer.yml` que ejecuta el mismo flujo en `windows-latest` y publica el instalador como artifact de Actions.
 
-Ese workflow ejecuta el mismo flujo en `windows-latest` y publica el instalador como artifact de Actions.
+---
 
-## 8. Flujo de instalacion sugerido
+## 📋 Flujo de instalación para el usuario final
 
-1. usuario instala WSL2
-2. usuario instala Ubuntu o Debian
-3. usuario instala dependencias base y `kraft`
-4. usuario valida el dashboard localhost
-5. usuario abre el launcher
-6. usuario configura distro y ruta Linux del repo
-7. usuario inicia servicios y los verifica por `localhost`
+1. 🪟 Instalar WSL2
+2. 🐧 Instalar Ubuntu o Debian
+3. ⚡ Instalar dependencias base y `kraft`
+4. 🧪 Validar el dashboard localhost
+5. 🖥️ Abrir el launcher
+6. ⚙️ Configurar distro y ruta Linux del repo
+7. ✅ Iniciar servicios y verificar por `localhost`
 
-## 9. Validacion real hecha en este repo
+---
 
-Se valido localmente en Windows:
+## ✅ Validación real hecha en este repo
 
-- `node scripts/verify-localhost.js`: ok
-- `dotnet test`: 25 tests ok
-- `build-windows-installer.ps1`: ok
-- instalacion silenciosa del `.exe`: ok
-- arranque del launcher instalado: ok
-- desinstalacion de verificacion: ok
+| Check | Estado |
+|---|---|
+| `node scripts/verify-localhost.js` | ✅ ok |
+| `dotnet test` (25 tests) | ✅ ok |
+| `build-windows-installer.ps1` | ✅ ok |
+| Instalación silenciosa del `.exe` | ✅ ok |
+| Arranque del launcher instalado | ✅ ok |
+| Desinstalación de verificación | ✅ ok |
 
-## 10. Que mejorar en una v2
+---
+
+## 🔮 Qué mejorar en una v2
 
 - MSI firmado o MSIX
-- bootstrap mas automatico para `kraft`
-- deteccion y reparacion de prerequisitos
-- mejor sincronizacion de catalogo en tiempo de ejecucion
-- validacion guiada desde la propia app
+- Bootstrap más automático para `kraft`
+- Detección y reparación de prerequisitos
+- Mejor sincronización de catálogo en tiempo de ejecución
+- Validación guiada desde la propia app
+
+---
+
+📖 Ver también: [04-windows-localhost-launcher.md](04-windows-localhost-launcher.md) · [CONTRIBUTING.md](../CONTRIBUTING.md) · [windows/PUBLISH_AND_INSTALL.md](../windows/PUBLISH_AND_INSTALL.md)

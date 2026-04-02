@@ -1,14 +1,19 @@
-# Publish and install (Windows)
+# 📦 Publish and Install — Windows
 
-Esta guia resume como dejar operativa la v1 en un equipo Windows.
+> Cómo dejar operativa v1 en un equipo Windows desde cero.
+> Para la guía completa → [docs/05-packaging-and-publish.md](../docs/05-packaging-and-publish.md)
 
-## 1. Instalar WSL2 y una distro
+---
+
+## 🪟 Paso 1 · Instalar WSL2 y una distro
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\windows\scripts\install-wsl-debian.ps1 -Distro Ubuntu
 ```
 
-## 2. Instalar dependencias base dentro de WSL
+---
+
+## 📦 Paso 2 · Instalar dependencias base en WSL
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\windows\scripts\install-runtime-prereqs.ps1 -Distro Ubuntu
@@ -20,34 +25,40 @@ Luego completa el runtime:
 wsl.exe -u root -d Ubuntu -- bash -lc "apt-get update && apt-get install -y --no-install-recommends bison build-essential flex git libncurses-dev qemu-system socat unzip wget iptables"
 ```
 
-## 3. Instalar KraftKit
+---
 
-Si el repo esta en `C:\dev\unikernel-labs`:
+## ⚡ Paso 3 · Instalar KraftKit
 
 ```powershell
 wsl.exe -d Ubuntu -- bash /mnt/c/dev/unikernel-labs/scripts/install-kraft-wsl.sh
 ```
 
-## 4. Validar entorno
+---
+
+## 🩺 Paso 4 · Validar entorno
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\windows\scripts\doctor-windows.ps1 -Distro Ubuntu -LinuxRepoPath /mnt/c/dev/unikernel-labs
 ```
 
-## 5. Levantar el dashboard local
+---
+
+## 🖥️ Paso 5 · Levantar el dashboard local
 
 ```powershell
 cd C:\dev\unikernel-labs
 node dashboard-server/server.js
 ```
 
-Verifica:
+Verifica la API:
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:9091/api/diagnostics | ConvertTo-Json
 ```
 
-## 6. Generar el instalador de Windows
+---
+
+## 🚀 Paso 6 · Generar el instalador de Windows
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\windows\scripts\build-windows-installer.ps1
@@ -55,27 +66,27 @@ powershell -ExecutionPolicy Bypass -File .\windows\scripts\build-windows-install
 
 Este flujo ejecuta en orden:
 
-- sincronizacion de `labs.windows.json`
-- validaciones localhost
-- pruebas del launcher
-- `dotnet publish`
-- compilacion del instalador con Inno Setup
-- instalacion silenciosa + arranque del launcher + desinstalacion de verificacion
+1. ✅ Sincroniza `labs.windows.json`
+2. ✅ Valida el flujo localhost
+3. ✅ Corre `dotnet test`
+4. ✅ `dotnet publish` self-contained
+5. ✅ Compila el instalador con Inno Setup
+6. ✅ Instala, abre y desinstala para verificar
 
-Artefactos esperados:
+### Artefactos generados
 
 ```text
 artifacts/publish/win-x64/UnikernelLabs.Launcher.exe
 artifacts/installer/UnikernelControlCenter-1.0.0-win-x64-setup.exe
 ```
 
-Si solo quieres publicar el ejecutable portable, usa:
+### Solo el ejecutable portable
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\windows\scripts\publish-launcher.ps1
 ```
 
-o manualmente:
+O manualmente:
 
 ```powershell
 dotnet publish .\launcher\windows\src\UnikernelLabs.Launcher\UnikernelLabs.Launcher.csproj `
@@ -85,27 +96,29 @@ dotnet publish .\launcher\windows\src\UnikernelLabs.Launcher\UnikernelLabs.Launc
   /p:PublishSingleFile=true
 ```
 
-## 7. Instalar o verificar el instalador
+---
 
-Para validar un instalador ya generado:
+## ✅ Paso 7 · Verificar un instalador ya generado
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\windows\scripts\verify-windows-installer.ps1 `
   -InstallerPath .\artifacts\installer\UnikernelControlCenter-1.0.0-win-x64-setup.exe
 ```
 
-## 8. Configurar el launcher
+---
+
+## ⚙️ Paso 8 · Configurar el launcher
 
 Al abrir el launcher instalado o publicado, configura:
 
-- distro WSL2: `Ubuntu`
-- ruta Linux del repo: `/mnt/c/dev/unikernel-labs` o la ruta Linux equivalente
+| Campo | Valor ejemplo |
+|---|---|
+| Distro WSL2 | `Ubuntu` |
+| Ruta Linux del repo | `/mnt/c/dev/unikernel-labs` |
 
-## 9. Validar la superficie localhost
+---
 
-Desde el dashboard o desde la app Windows, prueba un lab como `nginx-runtime`.
-
-Por API:
+## 🧪 Paso 9 · Validar la superficie localhost
 
 ```powershell
 $headers = @{ 'X-UCC-Request'='1'; 'Origin'='http://127.0.0.1:9091' }
@@ -114,23 +127,24 @@ Invoke-RestMethod http://127.0.0.1:9091/api/labs/02/health
 Invoke-WebRequest http://127.0.0.1:8080 -UseBasicParsing
 ```
 
-## 10. CI del instalador
+---
 
-El repo incluye el workflow:
+## ⚙️ Paso 10 · CI del instalador
 
-```text
-.github/workflows/build-windows-installer.yml
-```
+El workflow `.github/workflows/build-windows-installer.yml` compila y verifica
+el instalador en `windows-latest` y publica el `.exe` como artifact de GitHub Actions.
 
-Ese workflow compila y verifica el instalador en `windows-latest` y publica el `.exe` como artifact de GitHub Actions.
+---
 
-## 11. Nota de packaging
+## 🔄 Nota de sincronización del catálogo
 
-`labs.windows.json` se genera desde `labs.config.json`.
+> [!IMPORTANT]
+> Si cambias `labs.config.json` antes de publicar, sincroniza siempre:
+>
+> ```powershell
+> node scripts/sync-launcher-catalog.js
+> ```
 
-Si cambias el catalogo antes de publicar:
+---
 
-```powershell
-# desde la raiz del repo
-node scripts/sync-launcher-catalog.js
-```
+📖 Ver también: [README.md](README.md) · [docs/05-packaging-and-publish.md](../docs/05-packaging-and-publish.md) · [CONTRIBUTING.md](../CONTRIBUTING.md)

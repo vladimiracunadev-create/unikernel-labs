@@ -1,23 +1,38 @@
-# Release Notes V7
+# 📦 Release Notes · v7 — Autodetección y Estado Visual
 
-## Qué agrega esta iteración
+> **Unikernel Control Center v1** — Iteración de UX del launcher.
+> El backend sigue siendo WSL2 + kraft.
 
-- autodetección de entorno al iniciar el launcher
-- selector visual de distros WSL detectadas
-- grilla de servicios con estado por colores
-- persistencia del último servicio seleccionado
-- alineación documental con el posicionamiento de **Unikernel Control Center v1**
+---
 
-## Por qué importa
+## ✨ Qué agrega esta iteración
+
+- 🔍 Autodetección de entorno al iniciar el launcher
+- 🖥️ Selector visual de distros WSL detectadas
+- 🎨 Grilla de servicios con estado por colores
+- 💾 Persistencia del último servicio seleccionado
+- 📖 Alineación documental con el posicionamiento de **Unikernel Control Center v1**
+
+---
+
+## 💡 Por qué importa
 
 La v7 acerca más el launcher a una experiencia de producto.
-No cambia la verdad técnica: el backend sigue siendo **WSL2 + kraft**.
-Pero sí mejora la percepción operativa en Windows al mostrar:
 
-- contexto WSL ya detectado
-- elección más clara de distro
-- visión rápida del estado de los servicios
+No cambia la verdad técnica — el backend sigue siendo **WSL2 + kraft** — pero sí mejora la percepción operativa al mostrar:
 
-## Mensaje recomendado
+| Mejora | Descripción |
+|---|---|
+| 🔍 Contexto WSL | Distro ya detectada al abrir la app |
+| 🖥️ Selector claro | Elección más visual de distro |
+| 🎨 Estado visual | Visión rápida del estado por servicio |
 
-> Unikernel Control Center v1 es una capa de operación local para gobernar servicios unikernel en Windows con backend WSL2, exposición por localhost y estado visual por servicio.
+---
+
+## 📣 Mensaje de posicionamiento
+
+> **Unikernel Control Center v1** es una capa de operación local para gobernar servicios unikernel en Windows con backend WSL2, exposición por localhost y estado visual por servicio.
+
+---
+
+📖 Ver también: [RELEASE_NOTES_V4.md](RELEASE_NOTES_V4.md) · [RELEASE_NOTES_V5.md](RELEASE_NOTES_V5.md) · [README.md](README.md)

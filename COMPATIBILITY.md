@@ -1,80 +1,104 @@
-# COMPATIBILITY
+# 🔀 COMPATIBILITY — Unikernel Control Center v1
+
+> Plataformas soportadas, matriz de validación y riesgos operativos.
+> Para el setup, consulta [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md).
+
+---
 
 ## Resumen ejecutivo
 
-La experiencia principal del repo esta pensada para:
+La experiencia principal está diseñada para:
 
-- Windows 11
-- WSL2
-- Ubuntu o Debian dentro de WSL
-- `kraft` instalado en `~/.local/bin`
-- QEMU/KVM disponible
-- `iptables` disponible
-- dashboard local o launcher Windows como capa de control
+- 🪟 **Windows 11** con WSL2 habilitado
+- 🐧 **Ubuntu o Debian** dentro de WSL2
+- ⚡ `kraft` instalado en `~/.local/bin`
+- 🖥️ QEMU/KVM disponible (`/dev/kvm`)
+- 🔒 `iptables` disponible
+- 🌐 Dashboard local o launcher Windows como capa de control
 
-## Matriz practica
+---
 
-### Windows + WSL2
+## 📊 Matriz de plataformas
 
-Es la ruta principal del producto.
+| Plataforma | Dashboard | Launcher | Labs | Notas |
+|---|:---:|:---:|:---:|---|
+| 🪟 Windows 11 + WSL2 | ✅ | ✅ | ✅ | **Ruta principal validada** |
+| 🪟 Windows 10 + WSL2 | 🟡 | 🟡 | 🟡 | No validado explícitamente |
+| 🐧 Linux nativo | 🟡 | ❌ | ✅ | Útil para troubleshooting de labs |
+| 🍎 macOS | 🟡 | ❌ | 🟡 | Solo lectura y desarrollo parcial |
+| ☁️ Linux en CI (Actions) | 🟡 | ✅ | 🟡 | Build del launcher validado |
 
-Validado en esta iteracion:
+**Leyenda:** ✅ validado · 🟡 parcial / no validado · ❌ no soportado
 
-- dashboard local en `localhost:9091`
-- deteccion de `Ubuntu`
-- `kraft version`
-- arranque de `nginx-runtime`
-- respuesta real en `http://localhost:8080`
+---
+
+## 🪟 Windows + WSL2 — Ruta principal
+
+Es la ruta principal del producto. Validado en esta iteración:
+
+- ✅ Dashboard local en `localhost:9091`
+- ✅ Detección de `Ubuntu` en WSL2
+- ✅ `kraft version` responde correctamente
+- ✅ Arranque de `nginx-runtime`
+- ✅ Respuesta real en `http://localhost:8080`
+- ✅ Build e instalación silenciosa del `.exe`
 
 ### Repo en filesystem Windows
 
-Ruta ejemplo:
-
 ```text
-C:\dev\unikernel-labs
+C:\dev\unikernel-labs   →   /mnt/c/dev/unikernel-labs (desde WSL)
 ```
 
-Visto desde WSL:
+Funciona bien para:
 
-```text
-/mnt/c/dev/unikernel-labs
-```
-
-Este layout funciona bien para:
-
-- dashboard Node corriendo en Windows
-- launcher WinForms
-- pruebas rapidas de `localhost`
+- Dashboard Node corriendo en Windows
+- Launcher WinForms
+- Pruebas rápidas de `localhost`
 
 ### Repo en filesystem Linux
 
-Sigue siendo una buena opcion para trabajo prolongado desde WSL.
+Buena opción para trabajo prolongado desde WSL. Más limpia para builds y workflows Linux puros.
 
-Es mas limpia para builds y workflows Linux puros, aunque no es obligatoria para el flujo actual del dashboard.
+---
 
-### Linux nativo
+## 🐧 Linux nativo
 
-Sigue siendo util para troubleshooting y validacion de labs, pero el producto se narra como Windows + WSL2 + localhost.
+Útil para troubleshooting y validación de labs directamente, pero el producto se narra como **Windows + WSL2 + localhost**.
 
-### macOS
+---
 
-Sirve para lectura, desarrollo parcial y documentacion, pero no es la ruta principal del producto.
+## 🍎 macOS
 
-## Riesgos operativos
+Sirve para lectura, desarrollo parcial y documentación. No es la ruta principal del producto.
 
-1. falta de virtualizacion o nested virtualization
-2. falta de `/dev/kvm`
-3. `kraft` no instalado o fuera de `PATH`
-4. QEMU no instalado
-5. `iptables` ausente
-6. colisiones de puertos en `localhost`
-7. diferencias de madurez entre labs
+---
 
-## Reglas de diseno
+## ⚠️ Riesgos operativos
 
-- la UX principal se cuenta desde Windows
-- el runtime real sigue siendo Linux
-- los puertos deben ser estables
-- los nombres de instancia deben ser estables
-- `labs.config.json` es la fuente de verdad
-- la app Windows debe seguir el mismo catalogo y la misma topologia localhost
+> [!CAUTION]
+> Estos riesgos pueden impedir completamente el arranque de los labs:
+
+| # | Riesgo | Impacto | Mitigación |
+|---|---|---|---|
+| 1 | Falta de virtualización o nested virtualization | 🔴 Crítico | Habilitar en BIOS / Hyper-V |
+| 2 | `/dev/kvm` no disponible | 🔴 Crítico | Verificar con `ls /dev/kvm` |
+| 3 | `kraft` no instalado o fuera de `PATH` | 🔴 Crítico | Ejecutar `install-kraft-wsl.sh` |
+| 4 | QEMU no instalado | 🔴 Crítico | `apt-get install qemu-system` |
+| 5 | `iptables` ausente | 🟠 Alto | `apt-get install iptables` |
+| 6 | Colisiones de puertos en `localhost` | 🟠 Alto | Verificar con `netstat -tulpn` |
+| 7 | Diferencias de madurez entre labs | 🟡 Medio | Consultar [docs/03-lab-selection.md](docs/03-lab-selection.md) |
+
+---
+
+## 📐 Reglas de diseño
+
+- La UX principal se cuenta **desde Windows**
+- El runtime real sigue siendo **Linux**
+- Los puertos deben ser **estables** (ver [RUNBOOK.md](RUNBOOK.md))
+- Los nombres de instancia deben ser **estables** (`ukl-*`)
+- `labs.config.json` es la **fuente de verdad**
+- La app Windows debe seguir el mismo catálogo y la misma topología localhost
+
+---
+
+📖 Ver también: [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md) · [RUNBOOK.md](RUNBOOK.md) · [docs/00-windows-and-wsl2.md](docs/00-windows-and-wsl2.md)

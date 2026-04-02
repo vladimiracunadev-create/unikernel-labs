@@ -1,24 +1,32 @@
-# Release Notes · v4 branding pass
+# 📦 Release Notes · v4 — Branding Pass
 
-## Objetivo
+> **Unikernel Control Center v1** — Iteración de mejora visual y narrativa
+> sin cambios en la arquitectura técnica.
 
-Subir el nivel visual y narrativo del repositorio y del launcher Windows sin cambiar la verdad técnica del proyecto.
+---
 
-## Cambios principales
+## ✨ Cambios principales
 
-- assets de branding (`assets/branding/`)
-- portada SVG para GitHub
-- icono y logo para la app Windows
-- launcher WinForms con cabecera tipo producto
-- menú superior
-- barra de estado
-- panel de detalle del servicio seleccionado
-- persistencia simple de configuración local
-- README y documentación alineados al posicionamiento de **Unikernel Control Center v1**
+- 🎨 Assets de branding (`assets/branding/`)
+  - Portada SVG para GitHub (`cover-v7.svg`)
+  - Icono y logo para la app Windows
+- 🪟 Launcher WinForms mejorado
+  - Cabecera tipo producto
+  - Menú superior
+  - Barra de estado
+  - Panel de detalle del servicio seleccionado
+  - Persistencia simple de configuración local
+- 📖 README y documentación alineados al posicionamiento de **Unikernel Control Center v1**
 
-## Lo que no cambia
+---
 
-- sigue siendo **Versión 1**
-- sigue usando **Windows + WSL2 + localhost**
-- no se presenta como reemplazo total de Docker Desktop
-- no promete runtime Windows nativo para `kraft`
+## 🔒 Lo que no cambia
+
+- Sigue siendo **Versión 1**
+- Sigue usando **Windows + WSL2 + localhost**
+- No se presenta como reemplazo total de Docker Desktop
+- No promete runtime Windows nativo para `kraft`
+
+---
+
+📖 Ver también: [RELEASE_NOTES_V5.md](RELEASE_NOTES_V5.md) · [RELEASE_NOTES_V7.md](RELEASE_NOTES_V7.md) · [README.md](README.md)
