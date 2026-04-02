@@ -29,7 +29,7 @@ Describe el problema de forma clara y concisa.
 
 Si aplica, pega los logs del output del launcher o una captura de pantalla.
 
-```
+```text
 (pega logs aquí)
 ```
 

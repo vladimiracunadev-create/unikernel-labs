@@ -27,20 +27,25 @@ Este repo junta tres piezas que trabajan sobre la misma idea:
 
 ### Arquitectura
 
-```text
-🪟  [ Navegador o app Windows ]
-              │
-              ▼
-⚙️  [ dashboard-server/server.js  ·  launcher WinForms ]
-              │
-              ▼
-🐧  [ wsl.exe → Ubuntu/Debian ]
-              │
-              ▼
-⚡  [ kraft + QEMU/KVM + iptables ]
-              │
-              ▼
-🌐  [ servicios publicados en localhost ]
+```mermaid
+graph TD
+    User["👤 Usuario<br>(Navegador o App)"]
+    WinApp["🪟 Capa de Control<br>(Dashboard Node.js / Launcher .NET)"]
+    WSL["🐧 Backend WSL2<br>(Ubuntu / Debian)"]
+    Runtime["⚡ Runtime Unikernel<br>(kraft + QEMU/KVM + iptables)"]
+    Service["🌐 Servicios publicados<br>(Localhost)"]
+
+    User -->|Interacción| WinApp
+    WinApp -->|wsl.exe / Control| WSL
+    WSL -->|kraft run / Orquestación| Runtime
+    Runtime -->|Localhost Bridge| Service
+    Service -.->|Acceso Directo| User
+
+    style User fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style WinApp fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style WSL fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    style Runtime fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    style Service fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
 ```
 
 > [!NOTE]
@@ -156,11 +161,11 @@ Invoke-WebRequest http://127.0.0.1:8080 -UseBasicParsing
 
 | Servicio | Puerto | URL | Protocolo |
 |---|---:|---|---|
-| 🖥️ Dashboard local + API | 9091 | [localhost:9091](http://localhost:9091) | HTTP |
-| 🌐 NGINX unikernel | 8080 | [localhost:8080](http://localhost:8080) | HTTP |
-| 🐍 Python HTTP | 8081 | [localhost:8081](http://localhost:8081) | HTTP |
-| 🟢 Node HTTP | 8082 | [localhost:8082](http://localhost:8082) | HTTP |
-| 🗄️ Redis | 6379 | redis://localhost:6379 | TCP |
+| 🖥️ Dashboard local + API | 9091 | [http://localhost:9091](http://localhost:9091) | HTTP |
+| 🌐 NGINX unikernel | 8080 | [http://localhost:8080](http://localhost:8080) | HTTP |
+| 🐍 Python HTTP | 8081 | [http://localhost:8081](http://localhost:8081) | HTTP |
+| 🟢 Node HTTP | 8082 | [http://localhost:8082](http://localhost:8082) | HTTP |
+| 🗄️ Redis | 6379 | `redis://localhost:6379` | TCP |
 
 ---
 

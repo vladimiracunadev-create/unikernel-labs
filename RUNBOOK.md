@@ -52,11 +52,11 @@ Invoke-WebRequest http://127.0.0.1:8080 -UseBasicParsing
 
 | Servicio | Puerto | URL |
 |---|---:|---|
-| 🖥️ Dashboard + API | 9091 | http://localhost:9091 |
-| 🌐 nginx | 8080 | http://localhost:8080 |
-| 🐍 python | 8081 | http://localhost:8081 |
-| 🟢 node | 8082 | http://localhost:8082 |
-| 🗄️ redis | 6379 | redis://localhost:6379 |
+| 🖥️ Dashboard + API | 9091 | [http://localhost:9091](http://localhost:9091) |
+| 🌐 nginx | 8080 | [http://localhost:8080](http://localhost:8080) |
+| 🐍 python | 8081 | [http://localhost:8081](http://localhost:8081) |
+| 🟢 node | 8082 | [http://localhost:8082](http://localhost:8082) |
+| 🗄️ redis | 6379 | `redis://localhost:6379` |
 
 ---
 
