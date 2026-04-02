@@ -2,8 +2,7 @@
 
 ![Unikernel Control Center v1](assets/branding/cover-v7.svg)
 
-> **Unikernel Control Center v1** — Suite local para levantar y gobernar servicios unikernel desde Windows,
-> usando WSL2 como backend Linux y `localhost` como superficie operativa.
+> 🚀 **Unikernel Control Center v1** — Suite profesional para el control total de servicios **Unikraft** desde Windows. Orquestación local transparente vía **WSL2**, gestión unificada con **Dashboard Node.js** y **Launcher WinForms**, y exposición activa en **localhost**. ⚡
 
 [![Build](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/dotnet-launcher.yml?branch=main&label=build&logo=github)](https://github.com/vladimiracunadev-create/unikernel-labs/actions)
 [![Tests](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/dotnet-launcher.yml?branch=main&label=tests&logo=dotnet)](https://github.com/vladimiracunadev-create/unikernel-labs/actions)
