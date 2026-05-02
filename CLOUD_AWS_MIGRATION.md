@@ -19,8 +19,8 @@
 
 1. [🎯 Objetivo de la migración](#-objetivo-de-la-migración)
 2. [🧩 Mapeo Local → AWS](#-mapeo-local--aws)
-3. [🏛️ Arquitectura objetivo](#-arquitectura-objetivo)
-4. [🛠️ Tecnologías AWS evaluadas](#-tecnologías-aws-evaluadas)
+3. [🧱 Arquitectura objetivo](#-arquitectura-objetivo)
+4. [🧰 Tecnologías AWS evaluadas](#-tecnologías-aws-evaluadas)
 5. [📊 Comparativa de rutas](#-comparativa-de-rutas)
 6. [🚦 Fases de migración](#-fases-de-migración)
 7. [🪜 Paso a paso (Ruta recomendada)](#-paso-a-paso-ruta-recomendada)
@@ -111,7 +111,7 @@ graph LR
 
 ---
 
-## 🏛️ Arquitectura objetivo
+## 🧱 Arquitectura objetivo
 
 ### Vista de alto nivel (ruta recomendada)
 
@@ -194,7 +194,7 @@ sequenceDiagram
 
 ---
 
-## 🛠️ Tecnologías AWS evaluadas
+## 🧰 Tecnologías AWS evaluadas
 
 ### A · Compute (donde corre el unikernel)
 
@@ -312,7 +312,7 @@ gantt
 
 ---
 
-## 🪜 Paso a paso (Ruta recomendada 🅲)
+## 🪜 Paso a paso (Ruta recomendada)
 
 ### Prerrequisitos
 
