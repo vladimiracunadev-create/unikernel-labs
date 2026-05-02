@@ -246,6 +246,7 @@ El verificador comprueba:
 | [COMPATIBILITY.md](COMPATIBILITY.md) | Plataformas soportadas y riesgos |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Cómo contribuir al proyecto |
 | [ROADMAP.md](ROADMAP.md) | Versiones y features planeadas |
+| [☁️ CLOUD_AWS_MIGRATION.md](CLOUD_AWS_MIGRATION.md) | Plan completo de migración a AWS (rutas, pasos, costos) |
 | [FILE_ARCHITECTURE.md](FILE_ARCHITECTURE.md) | Árbol de archivos comentado |
 | [docs/00-windows-and-wsl2.md](docs/00-windows-and-wsl2.md) | Modelo Windows + WSL2 |
 | [docs/04-windows-localhost-launcher.md](docs/04-windows-localhost-launcher.md) | Launcher architecture |
