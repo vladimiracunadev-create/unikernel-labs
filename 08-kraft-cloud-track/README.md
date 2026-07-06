@@ -1,10 +1,17 @@
-# ☁️ Track 08 — KraftCloud
+# ☁️ Track 08 — Unikraft Cloud
 
 [![Status](https://img.shields.io/badge/status-pista%20experimental-yellow)](../ROADMAP.md)
 [![Milestone](https://img.shields.io/badge/milestone-v0.3-blue)](../ROADMAP.md)
 
 > Exploración de despliegue remoto de unikernels usando `kraft cloud`
 > y Compose experimental en cloud.
+
+---
+
+> [!NOTE]
+> El servicio antes conocido como **KraftCloud** se rebrandeó a
+> **Unikraft Cloud** ([unikraft.com](https://unikraft.com), "10 ms sandboxes").
+> El comando de CLI sigue siendo `kraft cloud`.
 
 ---
 
@@ -23,7 +30,7 @@
 Este track **complementa** la suite local:
 
 - La suite local opera en `localhost` via WSL2
-- Este track explora la extensión hacia la nube con `kraft cloud`
+- Este track explora la extensión hacia la nube con `kraft cloud` (Unikraft Cloud)
 - Mismo modelo de labs, diferente superficie de despliegue
 
 ---
@@ -34,4 +41,4 @@ Este track **complementa** la suite local:
 
 ---
 
-📖 Ver también: [07-runu-track](../07-runu-track/README.md) · [docs/03-lab-selection.md](../docs/03-lab-selection.md) · [ROADMAP.md](../ROADMAP.md)
+📖 Ver también: [07-urunc-track](../07-urunc-track/README.md) · [docs/03-lab-selection.md](../docs/03-lab-selection.md) · [ROADMAP.md](../ROADMAP.md)

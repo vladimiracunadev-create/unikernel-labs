@@ -12,6 +12,7 @@
 
 | Campo | Valor |
 |---|---|
+| Imagen runtime | `unikraft.org/redis:7.2` |
 | Puerto host | `6379` |
 | Instancia kraft | `ukl-redis` |
 | Protocolo health | TCP |

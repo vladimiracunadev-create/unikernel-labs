@@ -1,5 +1,5 @@
 spec: v0.6
 name: redis-runtime
-runtime: unikraft.org/redis:7.0
+runtime: unikraft.org/redis:7.2
 targets:
   - qemu/x86_64

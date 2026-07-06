@@ -12,6 +12,7 @@
 
 | Campo | Valor |
 |---|---|
+| Imagen runtime | `unikraft.org/python:3.13` |
 | Puerto host | `8081` |
 | Instancia kraft | `ukl-python` |
 | Protocolo health | HTTP |
@@ -55,6 +56,13 @@ Invoke-RestMethod http://127.0.0.1:9091/api/labs/03/health
 
 Este lab muestra la transición desde _"contenedor con código montado"_ hacia
 _"runtime unikernel con código montado"_: misma idea, diferente stack de ejecución.
+
+> [!TIP]
+> **Patrón empaquetado (avanzado).** El `Kraftfile` de este lab monta el código con
+> `volumes: ./src` — ideal para iterar en desarrollo. El patrón recomendado del catálogo
+> para **desplegar** (p. ej. en `urunc` o Unikraft Cloud) es hornear el filesystem desde un
+> `Dockerfile` con `rootfs: ./Dockerfile`, produciendo una imagen unikernel autocontenida.
+> Ver [Track 07 — urunc](../07-urunc-track/README.md).
 
 ---
 

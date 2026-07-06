@@ -12,6 +12,7 @@
 
 | Campo | Valor |
 |---|---|
+| Imagen runtime | `unikraft.org/node:20` |
 | Puerto host | `8082` |
 | Instancia kraft | `ukl-node` |
 | Protocolo health | HTTP |
@@ -48,6 +49,13 @@ $headers = @{ 'X-UCC-Request'='1'; 'Origin'='http://127.0.0.1:9091' }
 Invoke-RestMethod -Method Post -Headers $headers http://127.0.0.1:9091/api/labs/04/start
 Invoke-RestMethod http://127.0.0.1:9091/api/labs/04/health
 ```
+
+---
+
+> [!TIP]
+> **Patrón empaquetado (avanzado).** El `volumes: ./src` de este `Kraftfile` es cómodo para
+> desarrollo. Para desplegar (`urunc` / Unikraft Cloud) el catálogo recomienda hornear el
+> filesystem con `rootfs: ./Dockerfile` y obtener una imagen unikernel autocontenida.
 
 ---
 

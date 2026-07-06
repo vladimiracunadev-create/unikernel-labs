@@ -1,6 +1,6 @@
 spec: v0.6
 name: node-http
-runtime: unikraft.org/node:18
+runtime: unikraft.org/node:20
 targets:
   - qemu/x86_64
 volumes:

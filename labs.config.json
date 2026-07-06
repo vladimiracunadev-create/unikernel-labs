@@ -80,10 +80,10 @@
     },
     {
       "id": "07",
-      "name": "runu-track",
-      "path": "07-runu-track",
+      "name": "urunc-track",
+      "path": "07-urunc-track",
       "status": "planned",
-      "description": "Pista OCI / runtime avanzado.",
+      "description": "Pista OCI: unikernels vía urunc + containerd.",
       "healthProtocol": null
     },
     {
@@ -91,7 +91,7 @@
       "name": "kraft-cloud-track",
       "path": "08-kraft-cloud-track",
       "status": "planned",
-      "description": "Pista cloud y compose experimental.",
+      "description": "Pista cloud (Unikraft Cloud) y compose experimental.",
       "healthProtocol": null
     }
   ]

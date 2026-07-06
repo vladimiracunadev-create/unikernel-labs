@@ -16,8 +16,8 @@ unikernel-labs/
 ├── 04-node-http/            # Lab: Node.js HTTP server en localhost:8082
 ├── 05-redis-runtime/        # Lab: Redis unikernel en localhost:6379
 ├── 06-benchmarks/           # Pista: estrategia de benchmarking
-├── 07-runu-track/           # Pista: runtime alternativo runu
-├── 08-kraft-cloud-track/    # Pista: despliegue en KraftCloud
+├── 07-urunc-track/          # Pista: runtime OCI urunc + containerd
+├── 08-kraft-cloud-track/    # Pista: despliegue en Unikraft Cloud (kraft cloud)
 │
 ├── assets/                  # Branding: cover SVG, logo, icono
 │

@@ -35,8 +35,8 @@
 
 [![v0.3](https://img.shields.io/badge/v0.3-planificado-blue)](docs/03-lab-selection.md)
 
-- [ ] Track `runu` ([07-runu-track](07-runu-track/README.md))
-- [ ] Track cloud con `kraft cloud` ([08-kraft-cloud-track](08-kraft-cloud-track/README.md))
+- [ ] Track `urunc` — runtime OCI + containerd ([07-urunc-track](07-urunc-track/README.md))
+- [ ] Track cloud con `kraft cloud` / Unikraft Cloud ([08-kraft-cloud-track](08-kraft-cloud-track/README.md))
 - [ ] Ejemplo de rootfs custom
 - [ ] Pipeline GitHub Actions para labs
 

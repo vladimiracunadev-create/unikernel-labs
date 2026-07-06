@@ -35,8 +35,8 @@ Los demás labs siguen en el catálogo y deben verificarse con el mismo flujo:
 | # | Pista | Doc |
 |---|---|---|
 | 06 | Benchmarks formales | [06-benchmarks/README.md](../06-benchmarks/README.md) |
-| 07 | `runu` — runtime alternativo | [07-runu-track/README.md](../07-runu-track/README.md) |
-| 08 | `kraft cloud` — despliegue cloud | [08-kraft-cloud-track/README.md](../08-kraft-cloud-track/README.md) |
+| 07 | `urunc` — runtime OCI para unikernels | [07-urunc-track/README.md](../07-urunc-track/README.md) |
+| 08 | `kraft cloud` (Unikraft Cloud) — despliegue cloud | [08-kraft-cloud-track/README.md](../08-kraft-cloud-track/README.md) |
 
 ---
 
