@@ -564,12 +564,17 @@ function createServer(options = {}) {
 
   const server = http.createServer(async (req, res) => {
     const pathname = new URL(req.url, `http://${req.headers.host || `${host}:${port}`}`).pathname;
+    // Raw, un-normalized path for static serving: the WHATWG URL parser decodes
+    // and collapses encoded dot-segments (e.g. `%2e%2e`), which would hide path
+    // traversal from resolveStaticPath. req.url is never decoded by the http server,
+    // so we strip only the query/fragment and let resolveStaticPath guard it.
+    const rawPathname = req.url.split(/[?#]/, 1)[0];
 
     try {
       if (pathname.startsWith('/api/')) {
         await handleApi(req, res, pathname);
       } else {
-        handleStatic(req, res, pathname);
+        handleStatic(req, res, rawPathname);
       }
     } catch (error) {
       console.error(error.message);

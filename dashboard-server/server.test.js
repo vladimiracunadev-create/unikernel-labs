@@ -5,6 +5,23 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const http = require('http');
+
+// Raw GET that sends the request-target verbatim. Unlike fetch()/undici — which
+// normalizes encoded dot-segments (e.g. `%2e%2e`) client-side per the WHATWG URL
+// spec — this reaches the server with the path intact, so it can exercise the
+// server's own path-traversal defense.
+function rawGet(baseUrl, rawPath) {
+  const { hostname, port } = new URL(baseUrl);
+  return new Promise((resolve, reject) => {
+    const req = http.request({ hostname, port, path: rawPath, method: 'GET' }, res => {
+      res.resume();
+      resolve({ status: res.statusCode });
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
 
 const {
   createServer,
@@ -146,7 +163,7 @@ test('api routes honor config commands and protect state-changing endpoints', as
     assert.equal(staticResponse.status, 200);
     assert.equal(await staticResponse.text(), 'hello');
 
-    const traversalResponse = await fetch(`${runtime.baseUrl}/%2e%2e/secret.txt`);
+    const traversalResponse = await rawGet(runtime.baseUrl, '/%2e%2e/secret.txt');
     assert.equal(traversalResponse.status, 403);
 
     assert.deepEqual(
