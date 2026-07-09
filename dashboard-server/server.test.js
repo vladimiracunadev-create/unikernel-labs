@@ -11,12 +11,14 @@ const http = require('http');
 // normalizes encoded dot-segments (e.g. `%2e%2e`) client-side per the WHATWG URL
 // spec — this reaches the server with the path intact, so it can exercise the
 // server's own path-traversal defense.
-function rawGet(baseUrl, rawPath) {
+function rawGet(baseUrl, rawPath, headers = {}) {
   const { hostname, port } = new URL(baseUrl);
   return new Promise((resolve, reject) => {
-    const req = http.request({ hostname, port, path: rawPath, method: 'GET' }, res => {
-      res.resume();
-      resolve({ status: res.statusCode });
+    const req = http.request({ hostname, port, path: rawPath, method: 'GET', headers }, res => {
+      let body = '';
+      res.setEncoding('utf8');
+      res.on('data', chunk => { body += chunk; });
+      res.on('end', () => resolve({ status: res.statusCode, body }));
     });
     req.on('error', reject);
     req.end();
@@ -27,6 +29,7 @@ const {
   createServer,
   resolveStaticPath,
   takeLastLines,
+  isKraftRunning,
 } = require('./server');
 
 function createTempRepo() {
@@ -177,4 +180,67 @@ test('api routes honor config commands and protect state-changing endpoints', as
   } finally {
     await runtime.close();
   }
+});
+
+test('server hardening: host allowlist, static allowlist and /api/system', async () => {
+  const repoRoot = createTempRepo();
+  // Archivo NO permitido en la raíz del repo (simula código/.git que no debe servirse).
+  fs.writeFileSync(path.join(repoRoot, 'private.txt'), 'secret', 'utf8');
+
+  const config = {
+    labs: [
+      {
+        id: '02', name: 'nginx-runtime', path: '02-nginx-runtime', status: 'ready',
+        url: 'http://localhost:8080', port: 8080, kraftName: 'ukl-nginx',
+        startCommand: 'kraft run -W -d --name ukl-nginx -p 8080:80',
+        stopCommand: 'kraft stop ukl-nginx || true',
+        logsCommand: 'kraft logs ukl-nginx || true',
+        healthProtocol: 'http',
+      },
+    ],
+  };
+
+  const execAsync = async command => {
+    if (command.includes('kraft ps')) {
+      return { ok: true, exitCode: 0, output: 'ukl-nginx running', stdout: '', stderr: '' };
+    }
+    if (command.includes('kraft version')) {
+      return { ok: true, exitCode: 0, output: 'kraft 1.2.3', stdout: '', stderr: '' };
+    }
+    return { ok: true, exitCode: 0, output: '', stdout: '', stderr: '' };
+  };
+
+  const runtime = await startTestServer({ repoRoot, config, isWin: false, execAsync });
+
+  try {
+    // Allowlist estático: assets/ permitido, archivo suelto en raíz bloqueado (404, no traversal).
+    assert.equal((await rawGet(runtime.baseUrl, '/assets/hello.txt')).status, 200);
+    assert.equal((await rawGet(runtime.baseUrl, '/private.txt')).status, 404);
+
+    // Anti DNS-rebinding: Host que no es localhost:puerto → 403.
+    const rebind = await rawGet(runtime.baseUrl, '/api/labs', { Host: 'evil.example.com' });
+    assert.equal(rebind.status, 403);
+
+    // Host legítimo pasa.
+    const { hostname, port } = new URL(runtime.baseUrl);
+    const okHost = await rawGet(runtime.baseUrl, '/api/labs', { Host: `${hostname}:${port}` });
+    assert.equal(okHost.status, 200);
+
+    // /api/system devuelve el shape agregado.
+    const sys = await rawGet(runtime.baseUrl, '/api/system');
+    assert.equal(sys.status, 200);
+    const parsed = JSON.parse(sys.body);
+    assert.equal(parsed.running, 1);
+    assert.equal(parsed.ready, 1);
+    assert.equal(typeof parsed.uptimeSec, 'number');
+  } finally {
+    await runtime.close();
+  }
+});
+
+test('isKraftRunning matches whole names, not prefixes', () => {
+  assert.equal(isKraftRunning('ukl-nginx running', 'ukl-nginx'), true);
+  assert.equal(isKraftRunning('ukl-nginx-test running', 'ukl-nginx'), false);
+  assert.equal(isKraftRunning('', 'ukl-nginx'), false);
+  assert.equal(isKraftRunning('ukl-redis up', null), false);
 });

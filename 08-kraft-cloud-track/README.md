@@ -1,7 +1,7 @@
 # ☁️ Track 08 — Unikraft Cloud
 
 [![Status](https://img.shields.io/badge/status-pista%20experimental-yellow)](../ROADMAP.md)
-[![Milestone](https://img.shields.io/badge/milestone-v0.3-blue)](../ROADMAP.md)
+[![Milestone](https://img.shields.io/badge/milestone-Fase%20B-blue)](../ROADMAP.md)
 
 > Exploración de despliegue remoto de unikernels usando `kraft cloud`
 > y Compose experimental en cloud.
@@ -37,7 +37,7 @@ Este track **complementa** la suite local:
 
 ## 🔮 Estado
 
-⏳ Pendiente — ver [ROADMAP.md v0.3](../ROADMAP.md)
+⏳ Pendiente — ver [ROADMAP.md · Fase B](../ROADMAP.md)
 
 ---
 

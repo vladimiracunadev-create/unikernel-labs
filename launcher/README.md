@@ -63,7 +63,7 @@ powershell -ExecutionPolicy Bypass -File .\windows\scripts\build-windows-install
 
 ```text
 artifacts/publish/win-x64/UnikernelLabs.Launcher.exe
-artifacts/installer/UnikernelControlCenter-1.0.0-win-x64-setup.exe
+artifacts/installer/UnikernelControlCenter-2.0.0-win-x64-setup.exe
 ```
 
 ---

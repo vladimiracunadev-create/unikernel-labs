@@ -1,10 +1,19 @@
 param()
 
+# WSL_UTF8=1 hace que `wsl.exe -l` emita UTF-8 en vez de UTF-16LE, evitando
+# nombres de distro con bytes NUL intercalados que rompen las comparaciones.
+$env:WSL_UTF8 = "1"
+
 Write-Host "== WSL distros detectadas ==" -ForegroundColor Cyan
 wsl.exe -l -q
 
 $preferred = @('Debian','Ubuntu','Ubuntu-24.04','Ubuntu-22.04')
-$distros = (wsl.exe -l -q) | Where-Object { $_ -and $_.Trim() -ne '' } | ForEach-Object { $_.Trim() }
+# @(...) fuerza array aunque haya una sola distro (si no, $distros.Count es
+# $null y $distros[0] devolvería el primer carácter). -replace limpia NUL residual.
+$distros = @(wsl.exe -l -q) |
+  ForEach-Object { ($_ -replace "`0", '').Trim() } |
+  Where-Object { $_ -ne '' }
+
 $selected = $null
 foreach ($name in $preferred) {
   $match = $distros | Where-Object { $_ -ieq $name } | Select-Object -First 1

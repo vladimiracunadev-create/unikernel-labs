@@ -12,6 +12,7 @@ Thumbs.db
 build/
 out/
 .unikraft/
+unikraft/
 site/
 reports/*.txt
 reports/*.json

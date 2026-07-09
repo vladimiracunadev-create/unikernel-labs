@@ -2,7 +2,7 @@ name: markdown-docs
 
 on:
   push:
-    branches: ["**"]
+    branches: [main]
     paths:
       - '**/*.md'
       - '.github/workflows/markdown-docs.yml'
@@ -14,16 +14,19 @@ on:
       - '.markdownlint.json'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Lint markdown files
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: markdownlint
-        uses: davidanson/markdownlint-cli2-action@v16
+        uses: davidanson/markdownlint-cli2-action@b4c9feab76d8025d1e83c653fa3990936df0e6c8 # v16
         with:
           globs: |
             **/*.md

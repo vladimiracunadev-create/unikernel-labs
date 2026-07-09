@@ -2,6 +2,7 @@
 
 let _labs = [];
 let _logsId = null;
+let _logsTimer = null;
 let _diag = null;
 
 async function get(url) {
@@ -133,6 +134,9 @@ function buildCard(lab) {
   const protoPill = lab.healthProtocol
     ? `<span class="proto-pill">${escapeHtml(String(lab.healthProtocol).toUpperCase())}</span>`
     : '';
+  const healthBadge = (running && lab.port)
+    ? `<span class="health-badge hb-checking" data-health="${safeId}"><span class="hb-dot"></span>Check</span>`
+    : '';
 
   const statusBar = running
     ? `<div class="status-bar bar-running"><span class="pulse-dot"></span>Servicio activo en localhost:${lab.port}</div>`
@@ -166,7 +170,7 @@ function buildCard(lab) {
       <div class="card-accent"></div>
       <div class="card-body">
         <div class="card-top">
-          <div class="card-pills">${portPill}${protoPill}</div>
+          <div class="card-pills">${portPill}${protoPill}${healthBadge}</div>
           <span class="card-id">#${safeId}</span>
         </div>
         <h3 class="card-name">${safeName}</h3>
@@ -178,11 +182,20 @@ function buildCard(lab) {
   `;
 }
 
+function labName(id) {
+  return _labs.find(item => item.id === id)?.name || id;
+}
+
 async function startLab(id) {
   setBusy(id, true);
   openLogsPanel(id, 'Iniciando...');
-  const result = await post(`/api/labs/${id}/start`);
-  appendLog(result?.output || result?.error || '(sin respuesta)');
+  try {
+    const result = await post(`/api/labs/${id}/start`);
+    appendLog(result?.output || result?.error || '(sin respuesta)');
+    toast(result?.ok ? `${labName(id)} iniciado` : `Error al iniciar ${labName(id)}`, result?.ok ? 'ok' : 'error');
+  } catch {
+    toast(`No se pudo iniciar ${labName(id)}`, 'error');
+  }
   await refresh();
   setBusy(id, false);
 }
@@ -190,8 +203,13 @@ async function startLab(id) {
 async function stopLab(id) {
   setBusy(id, true);
   openLogsPanel(id, 'Deteniendo...');
-  const result = await post(`/api/labs/${id}/stop`);
-  appendLog(result?.output || result?.error || '(sin respuesta)');
+  try {
+    const result = await post(`/api/labs/${id}/stop`);
+    appendLog(result?.output || result?.error || '(sin respuesta)');
+    toast(result?.ok ? `${labName(id)} detenido` : `Error al detener ${labName(id)}`, result?.ok ? 'ok' : 'error');
+  } catch {
+    toast(`No se pudo detener ${labName(id)}`, 'error');
+  }
   await refresh();
   setBusy(id, false);
 }
@@ -202,7 +220,12 @@ async function stopAll() {
     button.disabled = true;
   }
 
-  await post('/api/workspace/stop-all');
+  try {
+    const result = await post('/api/workspace/stop-all');
+    toast(result?.ok ? 'Todos los servicios detenidos' : `Detenidos con ${result?.failed ?? '?'} error(es)`, result?.ok ? 'ok' : 'error');
+  } catch {
+    toast('No se pudo detener el workspace', 'error');
+  }
   await refresh();
 
   if (button) {
@@ -256,24 +279,64 @@ async function fetchLogs(id) {
   element.scrollTop = element.scrollHeight;
 }
 
+function startLogsPoll(id) {
+  stopLogsPoll();
+  _logsTimer = setInterval(() => {
+    if (_logsId === id) {
+      fetchLogs(id);
+    }
+  }, 3_000);
+}
+
+function stopLogsPoll() {
+  if (_logsTimer) {
+    clearInterval(_logsTimer);
+    _logsTimer = null;
+  }
+}
+
 function closeLogs() {
   _logsId = null;
+  stopLogsPoll();
   document.getElementById('logs-panel').classList.remove('open');
   document.getElementById('logs-overlay').classList.remove('open');
 }
 
 async function refresh() {
   await Promise.all([loadLabs(), loadStats()]);
+  updateHealth();
   if (_logsId) {
     await fetchLogs(_logsId);
   }
 }
 
+async function updateHealth() {
+  const badges = Array.from(document.querySelectorAll('[data-health]'));
+  await Promise.all(badges.map(async el => {
+    const id = el.dataset.health;
+    try {
+      const health = await get(`/api/labs/${id}/health`);
+      const status = health.status === 'healthy'
+        ? 'healthy'
+        : health.status === 'unhealthy' ? 'unhealthy' : 'checking';
+      const label = status === 'healthy' ? 'Healthy' : status === 'unhealthy' ? 'Caído' : 'Check';
+      const detail = escapeHtml(health.detail || '');
+      el.className = `health-badge hb-${status}`;
+      el.innerHTML = `<span class="hb-dot"></span>${label}${detail ? ` · <span class="hb-latency">${detail}</span>` : ''}`;
+    } catch {
+      el.className = 'health-badge';
+      el.innerHTML = '<span class="hb-dot"></span>—';
+    }
+  }));
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   loadDiagnostics();
   refresh();
   setInterval(refresh, 10_000);
 
+  document.getElementById('btn-theme')?.addEventListener('click', toggleTheme);
   document.getElementById('search-input').addEventListener('input', render);
   document.getElementById('btn-refresh').addEventListener('click', () => {
     loadDiagnostics();
@@ -291,7 +354,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('labs').addEventListener('click', async event => {
     const urlButton = event.target.closest('[data-url]');
     if (urlButton) {
-      window.open(urlButton.dataset.url, '_blank');
+      const url = urlButton.dataset.url || '';
+      if (/^https?:\/\//i.test(url)) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
       return;
     }
 
@@ -310,9 +376,61 @@ document.addEventListener('DOMContentLoaded', () => {
     if (actionButton.classList.contains('btn-logs')) {
       openLogsPanel(id);
       await fetchLogs(id);
+      startLogsPoll(id);
     }
   });
 });
+
+/* ── Theme ─────────────────────────────────────────────────────────────────── */
+function prefersLight() {
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+}
+
+function effectiveTheme() {
+  return document.documentElement.getAttribute('data-theme') || (prefersLight() ? 'light' : 'dark');
+}
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === 'light' || theme === 'dark') {
+    root.setAttribute('data-theme', theme);
+  } else {
+    root.removeAttribute('data-theme');
+  }
+  const button = document.getElementById('btn-theme');
+  if (button) {
+    button.textContent = effectiveTheme() === 'light' ? '☀️' : '🌙';
+  }
+}
+
+function initTheme() {
+  applyTheme(localStorage.getItem('ucc-theme') || 'auto');
+}
+
+function toggleTheme() {
+  const next = effectiveTheme() === 'light' ? 'dark' : 'light';
+  localStorage.setItem('ucc-theme', next);
+  applyTheme(next);
+}
+
+/* ── Toasts ────────────────────────────────────────────────────────────────── */
+function toast(message, type = 'info') {
+  const container = document.getElementById('toasts');
+  if (!container) {
+    return;
+  }
+
+  const element = document.createElement('div');
+  element.className = `toast toast-${type}`;
+  const icon = type === 'ok' ? '✅' : type === 'error' ? '⛔' : 'ℹ️';
+  element.innerHTML = `<span class="toast-icon">${icon}</span><span>${escapeHtml(message)}</span>`;
+  container.appendChild(element);
+
+  setTimeout(() => {
+    element.classList.add('is-leaving');
+    setTimeout(() => element.remove(), 220);
+  }, 3_800);
+}
 
 function setText(id, value) {
   const element = document.getElementById(id);

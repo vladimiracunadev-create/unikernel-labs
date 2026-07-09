@@ -5,9 +5,24 @@
 
 ---
 
-## ✅ v1 — Control Center inicial _(completo)_
+## ✅ v2.0.0 — Producto + hardening _(completo)_
 
-[![v1](https://img.shields.io/badge/v1-completo-brightgreen)](README.md)
+[![v2](https://img.shields.io/badge/v2.0.0-completo-brightgreen)](CHANGELOG.md)
+
+- [x] Refresh del ecosistema Unikraft (runtimes al catálogo, `urunc`, Unikraft Cloud)
+- [x] Health en tiempo real, toasts y tema claro/oscuro en el dashboard web
+- [x] Endpoint `/api/system` y endurecimiento de seguridad (anti rebinding, allowlist)
+- [x] Hardening del launcher .NET, scripts shell y PowerShell
+- [x] CI con tests Node, acciones pinneadas a SHA y `permissions` explícitos
+- [x] Landing page de producto en GitHub Pages + `CHANGELOG.md`
+
+> Detalle completo en el [CHANGELOG](CHANGELOG.md).
+
+---
+
+## ✅ v1.0.0 — Control Center inicial _(completo)_
+
+[![v1](https://img.shields.io/badge/v1.0.0-completo-brightgreen)](README.md)
 
 - [x] Estructura del repo y catálogo raíz (`labs.config.json`)
 - [x] Dashboard local con API REST en `localhost:9091`
@@ -20,9 +35,13 @@
 
 ---
 
-## ⏳ v0.2 — Validación real _(en progreso)_
+> [!NOTE]
+> Las siguientes son **fases de trabajo** (no versiones de release). El versionado
+> del producto sigue SemVer: la versión publicada es la del [CHANGELOG](CHANGELOG.md).
 
-[![v0.2](https://img.shields.io/badge/v0.2-en%20progreso-yellow)](docs/01-benchmark-strategy.md)
+## ⏳ Fase A — Validación real _(en progreso)_
+
+[![fase-a](https://img.shields.io/badge/fase%20A-en%20progreso-yellow)](docs/01-benchmark-strategy.md)
 
 - [ ] Capturas de pantalla y evidencias del flujo completo
 - [ ] Benchmark reproducible de hello-world y nginx-runtime
@@ -31,9 +50,9 @@
 
 ---
 
-## 🔮 v0.3 — Expansión pragmática
+## 🔮 Fase B — Expansión pragmática
 
-[![v0.3](https://img.shields.io/badge/v0.3-planificado-blue)](docs/03-lab-selection.md)
+[![fase-b](https://img.shields.io/badge/fase%20B-planificado-blue)](docs/03-lab-selection.md)
 
 - [ ] Track `urunc` — runtime OCI + containerd ([07-urunc-track](07-urunc-track/README.md))
 - [ ] Track cloud con `kraft cloud` / Unikraft Cloud ([08-kraft-cloud-track](08-kraft-cloud-track/README.md))
@@ -42,9 +61,9 @@
 
 ---
 
-## 🔮 v0.4 — Madurez de portafolio
+## 🔮 Fase C — Madurez de portafolio
 
-[![v0.4](https://img.shields.io/badge/v0.4-planificado-blue)](RECRUITER.md)
+[![fase-c](https://img.shields.io/badge/fase%20C-planificado-blue)](RECRUITER.md)
 
 - [ ] Recruiter walkthrough guiado
 - [ ] Demo grabada del flujo completo
