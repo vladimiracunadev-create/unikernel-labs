@@ -1,7 +1,7 @@
 # 📊 Track 06 — Benchmarks
 
 [![Status](https://img.shields.io/badge/status-pista-yellow)](../ROADMAP.md)
-[![Milestone](https://img.shields.io/badge/milestone-v0.2-orange)](../ROADMAP.md)
+[![Milestone](https://img.shields.io/badge/milestone-Fase%20A-orange)](../ROADMAP.md)
 
 > Este track **no promete resultados mágicos**. Define cómo medir de forma seria
 > y reproducible. Consulta la estrategia completa → [docs/01-benchmark-strategy.md](../docs/01-benchmark-strategy.md)
@@ -36,7 +36,7 @@
 
 ## 🔮 Estado
 
-⏳ Pendiente — ver [ROADMAP.md v0.2](../ROADMAP.md)
+⏳ Pendiente — ver [ROADMAP.md · Fase A](../ROADMAP.md)
 
 ---
 

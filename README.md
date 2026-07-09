@@ -1,14 +1,15 @@
 # 🪂 unikernel-labs
 
-![Unikernel Control Center v1](assets/branding/cover-v7.svg)
+![Unikernel Control Center](assets/branding/cover-v7.svg)
 
-> 🚀 **Unikernel Control Center v1** — Suite profesional para el control total de servicios **Unikraft** desde Windows. Orquestación local transparente vía **WSL2**, gestión unificada con **Dashboard Node.js** y **Launcher WinForms**, y exposición activa en **localhost**. ⚡
+> 🚀 **Unikernel Control Center** — "Docker Desktop para unikernels". Suite profesional para el control total de servicios **Unikraft** desde Windows. Orquestación local transparente vía **WSL2**, gestión unificada con **Dashboard Node.js** y **Launcher WinForms**, health en tiempo real y exposición activa en **localhost**. ⚡
 
 [![Build](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/dotnet-launcher.yml?branch=main&label=build&logo=github)](https://github.com/vladimiracunadev-create/unikernel-labs/actions)
-[![Tests](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/dotnet-launcher.yml?branch=main&label=tests&logo=dotnet)](https://github.com/vladimiracunadev-create/unikernel-labs/actions)
+[![Tests](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/dashboard-localhost.yml?branch=main&label=tests&logo=nodedotjs)](https://github.com/vladimiracunadev-create/unikernel-labs/actions/workflows/dashboard-localhost.yml)
 [![Installer](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/build-windows-installer.yml?branch=main&label=installer&logo=windows)](https://github.com/vladimiracunadev-create/unikernel-labs/actions)
+[![Docs](https://img.shields.io/github/actions/workflow/status/vladimiracunadev-create/unikernel-labs/markdown-docs.yml?branch=main&label=docs&logo=markdown)](https://github.com/vladimiracunadev-create/unikernel-labs/actions/workflows/markdown-docs.yml)
 [![Release](https://img.shields.io/github/v/release/vladimiracunadev-create/unikernel-labs?label=release&logo=github)](https://github.com/vladimiracunadev-create/unikernel-labs/releases)
-[![Status](https://img.shields.io/badge/status-v1-blue?logo=checkmarx)](https://github.com/vladimiracunadev-create/unikernel-labs)
+[![Status](https://img.shields.io/badge/status-v2.0.0-blue?logo=checkmarx)](CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%2B%20WSL2-orange?logo=windows)](docs/00-windows-and-wsl2.md)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green?logo=apache)](LICENSE)
 
@@ -53,19 +54,23 @@ graph TD
 
 ---
 
-## ✅ Estado actual — v1 validado
+## ✅ Estado actual — v2.0.0
 
 Lo que hoy está implementado y documentado:
 
-- ✅ Dashboard local con REST API en `localhost:9091`
+- ✅ Dashboard local con REST API en `localhost:9091` + endpoint `/api/system`
 - ✅ Diagnóstico de WSL, distro y versión de `kraft`
-- ✅ Start, Stop, Logs y Health por lab
+- ✅ Start, Stop, Logs y **Health en tiempo real** por lab (badges HTTP/Redis/TCP)
+- ✅ **Toasts** de feedback, **tema claro/oscuro** y auto-poll de logs en la UI web
 - ✅ Catálogo raíz en `labs.config.json`
-- ✅ Scripts para sincronizar catálogo y verificar flujo localhost
 - ✅ Launcher WinForms que consume el mismo set de labs
-- ✅ Script y workflow para generar un instalador `.exe` de Windows
+- ✅ Instalador `.exe` de Windows con build e instalación silenciosa
 - ✅ Arranque real de `nginx-runtime` con respuesta en `http://localhost:8080`
-- ✅ Build e instalación silenciosa del instalador
+- ✅ **Endurecimiento de seguridad**: anti DNS-rebinding, allowlist estático,
+  anti-CSRF y anti-path-traversal en la API local
+- ✅ **Landing page** de producto ([`landing/`](landing/index.html)) publicada en GitHub Pages
+
+> Ver el [CHANGELOG](CHANGELOG.md) para el detalle completo de la v2.0.0.
 
 ---
 
@@ -203,7 +208,7 @@ Artefactos generados:
 
 ```text
 artifacts/publish/win-x64/UnikernelLabs.Launcher.exe
-artifacts/installer/UnikernelControlCenter-1.0.0-win-x64-setup.exe
+artifacts/installer/UnikernelControlCenter-2.0.0-win-x64-setup.exe
 ```
 
 📖 Más info → [`docs/05-packaging-and-publish.md`](docs/05-packaging-and-publish.md) · [`windows/PUBLISH_AND_INSTALL.md`](windows/PUBLISH_AND_INSTALL.md)
@@ -258,6 +263,8 @@ El verificador comprueba:
 
 | Documento | Descripción |
 |---|---|
+| [CHANGELOG.md](CHANGELOG.md) | Historial de versiones (SemVer) |
+| [landing/](landing/index.html) | Landing page del producto (GitHub Pages) |
 | [RUNBOOK.md](RUNBOOK.md) | Comandos operativos del día a día |
 | [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md) | Setup completo paso a paso |
 | [COMPATIBILITY.md](COMPATIBILITY.md) | Plataformas soportadas y riesgos |

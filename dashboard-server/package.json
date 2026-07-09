@@ -1,6 +1,6 @@
 {
   "name": "unikernel-control-center-server",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "REST API server for Unikernel Control Center dashboard",
   "main": "server.js",
   "scripts": {

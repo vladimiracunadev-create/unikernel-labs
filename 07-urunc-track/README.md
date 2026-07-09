@@ -1,7 +1,7 @@
 # 🔬 Track 07 — urunc
 
 [![Status](https://img.shields.io/badge/status-pista%20experimental-yellow)](../ROADMAP.md)
-[![Milestone](https://img.shields.io/badge/milestone-v0.3-blue)](../ROADMAP.md)
+[![Milestone](https://img.shields.io/badge/milestone-Fase%20B-blue)](../ROADMAP.md)
 
 > Exploración de ejecución de unikernels empaquetados como OCI
 > a través de runtimes de contenedor compatibles con containerd.
@@ -58,7 +58,7 @@ Su función es:
 
 ## 🔮 Estado
 
-⏳ Pendiente — ver [ROADMAP.md v0.3](../ROADMAP.md)
+⏳ Pendiente — ver [ROADMAP.md · Fase B](../ROADMAP.md)
 
 ---
 

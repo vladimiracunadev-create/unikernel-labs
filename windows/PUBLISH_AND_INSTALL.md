@@ -77,7 +77,7 @@ Este flujo ejecuta en orden:
 
 ```text
 artifacts/publish/win-x64/UnikernelLabs.Launcher.exe
-artifacts/installer/UnikernelControlCenter-1.0.0-win-x64-setup.exe
+artifacts/installer/UnikernelControlCenter-2.0.0-win-x64-setup.exe
 ```
 
 ### Solo el ejecutable portable
@@ -102,7 +102,7 @@ dotnet publish .\launcher\windows\src\UnikernelLabs.Launcher\UnikernelLabs.Launc
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\windows\scripts\verify-windows-installer.ps1 `
-  -InstallerPath .\artifacts\installer\UnikernelControlCenter-1.0.0-win-x64-setup.exe
+  -InstallerPath .\artifacts\installer\UnikernelControlCenter-2.0.0-win-x64-setup.exe
 ```
 
 ---
