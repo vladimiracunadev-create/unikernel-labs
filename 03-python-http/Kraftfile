@@ -1,6 +1,6 @@
 spec: v0.6
 name: python-http
-runtime: unikraft.org/python:3.10
+runtime: unikraft.org/python:3.13
 targets:
   - qemu/x86_64
 volumes:

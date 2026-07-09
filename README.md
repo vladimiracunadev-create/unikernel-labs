@@ -69,6 +69,23 @@ Lo que hoy está implementado y documentado:
 
 ---
 
+## 🆕 Novedades del ecosistema Unikraft
+
+Puesta al día del backend real frente al estado del proyecto Unikraft (2025–2026):
+
+| Área | Cambio | Impacto en este repo |
+|---|---|---|
+| 🧬 Core | Unikraft **v0.19 (Pan)** y **v0.20 (Kiviuq)** — rediseño del VFS, mejor compatibilidad de apps | Labs runtime más estables |
+| 📦 Runtimes | Bump de imágenes del catálogo | `python 3.13`, `node 20`, `redis 7.2`, `nginx 1.25` |
+| 🔬 OCI | `runu` → **`urunc`** ([urunc.io](https://urunc.io)), integrado con containerd (QEMU/Firecracker) | [Track 07](07-urunc-track/README.md) actualizado |
+| ☁️ Cloud | **KraftCloud** rebrandeado a **Unikraft Cloud** ([unikraft.com](https://unikraft.com)) | [Track 08](08-kraft-cloud-track/README.md) actualizado |
+| 🐫 Backends | Nuevo soporte de **MirageOS** sobre Unikraft | Futuro track de exploración |
+
+> [!NOTE]
+> El formato `Kraftfile` sigue en **`spec: v0.6`** — sin cambios de esquema requeridos.
+
+---
+
 ## 📚 Fuente de verdad del catálogo
 
 El catálogo operativo principal es `labs.config.json`.
@@ -220,7 +237,7 @@ El verificador comprueba:
 | 04 | [node-http](04-node-http/README.md) | ✅ ready | 8082 |
 | 05 | [redis-runtime](05-redis-runtime/README.md) | ✅ ready | 6379 |
 | 06 | [benchmarks](06-benchmarks/README.md) | ⏳ pista | — |
-| 07 | [runu-track](07-runu-track/README.md) | ⏳ pista | — |
+| 07 | [urunc-track](07-urunc-track/README.md) | ⏳ pista | — |
 | 08 | [kraft-cloud-track](08-kraft-cloud-track/README.md) | ⏳ pista | — |
 
 ---
