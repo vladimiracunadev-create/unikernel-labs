@@ -2,7 +2,7 @@ name: dashboard-localhost
 
 on:
   push:
-    branches: ["**"]
+    branches: [main]
     paths:
       - 'dashboard-server/**'
       - 'dashboard.js'
@@ -27,15 +27,21 @@ on:
       - 'Makefile'
       - '.github/workflows/dashboard-localhost.yml'
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '20'
+
+      - name: Unit tests (node --test)
+        run: node --test dashboard-server/server.test.js scripts/sync-launcher-catalog.test.js
 
       - name: Validate localhost dashboard
         run: node scripts/verify-localhost.js
