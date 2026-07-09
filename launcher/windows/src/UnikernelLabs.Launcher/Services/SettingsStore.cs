@@ -39,7 +39,15 @@ public sealed class SettingsStore
 
     public void Save(AppSettings settings)
     {
-        var options = new JsonSerializerOptions { WriteIndented = true };
-        File.WriteAllText(_settingsPath, JsonSerializer.Serialize(settings, options));
+        try
+        {
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            File.WriteAllText(_settingsPath, JsonSerializer.Serialize(settings, options));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // Persistencia best-effort: no reventar el cierre de la app (Save se
+            // invoca desde FormClosing) si el disco está lleno o de solo-lectura.
+        }
     }
 }

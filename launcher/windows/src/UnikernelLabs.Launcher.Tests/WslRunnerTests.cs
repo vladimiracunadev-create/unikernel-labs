@@ -112,6 +112,19 @@ public class WslRunnerTests
     }
 
     [Fact]
+    public void BuildRepoAwareCommand_EscapesSingleQuotesInRelativePath()
+    {
+        const string repoPath = "/home/user/dev/unikernel-labs";
+        const string relativePath = "lab's-dir";
+        const string raw = "cd '{lab_path}'";
+
+        var result = WslRunner.BuildRepoAwareCommand(repoPath, relativePath, raw);
+
+        // Single quotes in the relative path must be shell-escaped (defense in depth).
+        Assert.Contains("lab'\\''s-dir", result);
+    }
+
+    [Fact]
     public void BuildRepoAwareCommand_NormalizesBackslashesInRelativePath()
     {
         const string repoPath = "/home/user/dev/unikernel-labs";

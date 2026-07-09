@@ -95,7 +95,9 @@ public static class WslRunner
     public static string BuildRepoAwareCommand(string linuxRepoPath, string relativePath, string rawCommand)
     {
         var escapedRepo = linuxRepoPath.Replace("'", "'\\''");
-        var normalizedRelativePath = string.IsNullOrWhiteSpace(relativePath) ? string.Empty : relativePath.Replace("\\", "/");
+        var normalizedRelativePath = string.IsNullOrWhiteSpace(relativePath)
+            ? string.Empty
+            : relativePath.Replace("\\", "/").Replace("'", "'\\''");
         var repoPath = string.IsNullOrWhiteSpace(normalizedRelativePath)
             ? escapedRepo
             : $"{escapedRepo.TrimEnd('/')}/{normalizedRelativePath.TrimStart('/')}";
@@ -116,6 +118,10 @@ public static class WslRunner
             CreateNoWindow = true
         };
 
+        // WSL_UTF8=1 fuerza salida UTF-8 en `wsl.exe -l` (por defecto UTF-16LE),
+        // evitando nombres de distro con bytes NUL que rompen la autodetección.
+        psi.Environment["WSL_UTF8"] = "1";
+
         foreach (var arg in args)
         {
             psi.ArgumentList.Add(arg);
@@ -127,12 +133,32 @@ public static class WslRunner
         var stdout = process.StandardOutput.ReadToEndAsync();
         var stderr = process.StandardError.ReadToEndAsync();
 
-        await process.WaitForExitAsync(cancellationToken);
+        // Timeout de seguridad: si el llamador no impone deadline, un wsl.exe/kraft
+        // colgado no debe congelar la UI de forma indefinida.
+        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(120));
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+
+        try
+        {
+            await process.WaitForExitAsync(linked.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            try { process.Kill(entireProcessTree: true); } catch { /* el proceso ya terminó */ }
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                throw; // cancelación explícita del llamador: propágala
+            }
+
+            return new CommandResult(124, string.Empty, "El comando excedió el tiempo límite (120 s).");
+        }
 
         return new CommandResult(process.ExitCode, await stdout, await stderr);
     }
 
     private static IEnumerable<string> ParseLines(string text)
         => (text ?? string.Empty)
+            .Replace("\0", string.Empty)
             .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 }

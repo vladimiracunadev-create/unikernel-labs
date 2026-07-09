@@ -564,8 +564,16 @@ public sealed class MainForm : Form
         _btnDoctor.Click += async (_, _) => await RunDoctorAsync();
         _btnHealth.Click += async (_, _) => await RefreshAllServiceStatusesAsync(true);
         _btnOpen.Click += (_, _) => OpenSelectedLab();
-        _btnDetectDistro.Click += async (_, _) => await DetectPreferredDistroAsync(true);
-        _btnDetectRepo.Click += async (_, _) => await DetectRepoPathAsync(true);
+        _btnDetectDistro.Click += async (_, _) =>
+        {
+            try { await DetectPreferredDistroAsync(true); }
+            catch (Exception ex) { WriteOutput($"Detectar distros error: {ex.Message}"); UpdateStatus("Detección con error."); }
+        };
+        _btnDetectRepo.Click += async (_, _) =>
+        {
+            try { await DetectRepoPathAsync(true); }
+            catch (Exception ex) { WriteOutput($"Detectar ruta error: {ex.Message}"); UpdateStatus("Detección con error."); }
+        };
         _btnDetectAll.Click += async (_, _) => await AutoDetectEnvironmentAsync(true);
         _gridLabs.CellDoubleClick += (_, _) => OpenSelectedLab();
         _gridLabs.SelectionChanged += (_, _) =>
