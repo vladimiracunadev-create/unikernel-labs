@@ -25,7 +25,11 @@ const MIME = {
 };
 
 function loadConfig(configPath = DEFAULT_CONFIG_PATH) {
-  return JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  const parsed = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  if (!parsed || !Array.isArray(parsed.labs)) {
+    throw new Error(`Config inválida en ${configPath}: se esperaba un array "labs"`);
+  }
+  return parsed;
 }
 
 function toWslPath(winPath) {
@@ -57,6 +61,43 @@ function takeLastLines(value, maxLines = 80) {
 function isPathInside(rootPath, candidatePath) {
   const relative = path.relative(rootPath, candidatePath);
   return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+}
+
+// Detección exacta de instancia en el output de `kraft ps`. Usa límites de
+// whitespace en vez de substring para no marcar como running un prefijo
+// (p.ej. `ukl-nginx` cuando solo corre `ukl-nginx-test`). Case-insensitive
+// porque kraftPs normaliza a minúsculas.
+function isKraftRunning(psOutput, kraftName) {
+  if (!kraftName) {
+    return false;
+  }
+  const escaped = String(kraftName).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(^|\\s)${escaped}(\\s|$)`, 'mi').test(String(psOutput || ''));
+}
+
+// Solo se sirven estos recursos como estáticos. Evita exponer el árbol del repo
+// (código fuente, .git, docs) a través del servidor de control.
+const STATIC_ALLOWLIST = new Set([
+  'index.html',
+  'dashboard.js',
+  'dashboard.css',
+  'labs.config.json',
+]);
+
+function isAllowedStatic(relativePath) {
+  return STATIC_ALLOWLIST.has(relativePath) || relativePath.startsWith('assets/');
+}
+
+// Valida la cabecera Host contra el puerto local: bloquea ataques de
+// DNS-rebinding (un dominio del atacante que resuelva a 127.0.0.1).
+function isAllowedHost(hostHeader, port) {
+  if (!hostHeader) {
+    return false;
+  }
+  const [name, hostPort] = String(hostHeader).split(':');
+  const okName = name === '127.0.0.1' || name === 'localhost';
+  const okPort = !hostPort || Number(hostPort) === Number(port);
+  return okName && okPort;
 }
 
 function resolveStaticPath(repoRoot, pathname) {
@@ -162,9 +203,29 @@ function spawnAsync(fileName, args, options = {}) {
     });
 
     timeoutId = setTimeout(() => {
-      if (!child.killed) {
-        child.kill();
+      if (child && !child.killed) {
+        child.kill(); // SIGTERM
+        const sigkill = setTimeout(() => {
+          try {
+            child.kill('SIGKILL');
+          } catch {
+            /* el proceso ya terminó */
+          }
+        }, 2_000);
+        sigkill.unref?.();
       }
+      // Forzar la resolución aunque 'close' nunca dispare: un hijo detached
+      // (p.ej. `kraft run -d`) puede retener el pipe de stdout e impedir el
+      // evento 'close', dejando la petición HTTP colgada indefinidamente.
+      finalize({
+        ok: false,
+        exitCode: 124,
+        signal: 'SIGTERM',
+        stdout: trimOutput(stdout),
+        stderr: trimOutput(stderr),
+        output: trimOutput(stdout + stderr) || `El comando excedió el tiempo límite (${timeoutMs} ms)`,
+        error: 'timeout',
+      });
     }, timeoutMs);
   });
 }
@@ -428,7 +489,7 @@ function createServer(options = {}) {
       const psOutput = await kraftPs(execAsync);
       const runnableLabs = config.labs.filter(lab => lab.kraftName);
       const runningCount = runnableLabs
-        .filter(lab => psOutput.includes(String(lab.kraftName || '').toLowerCase()))
+        .filter(lab => isKraftRunning(psOutput, lab.kraftName))
         .length;
 
       return json(res, 200, {
@@ -439,13 +500,29 @@ function createServer(options = {}) {
       });
     }
 
+    if (pathname === '/api/system' && req.method === 'GET') {
+      const psOutput = await kraftPs(execAsync);
+      const runnableLabs = config.labs.filter(lab => lab.kraftName);
+      const diagnostics = await getDiagnostics(execAsync, isWin, getWslDistro);
+
+      return json(res, 200, {
+        running: runnableLabs.filter(lab => isKraftRunning(psOutput, lab.kraftName)).length,
+        ready: runnableLabs.length,
+        planned: config.labs.filter(lab => lab.status === 'planned').length,
+        total: config.labs.length,
+        mode: diagnostics.mode,
+        distro: diagnostics.distro,
+        kraft: diagnostics.kraft,
+        wsl: diagnostics.wsl,
+        uptimeSec: Math.round(process.uptime()),
+      });
+    }
+
     if (pathname === '/api/labs' && req.method === 'GET') {
       const psOutput = await kraftPs(execAsync);
       const labs = config.labs.map(lab => ({
         ...lab,
-        running: lab.kraftName
-          ? psOutput.includes(String(lab.kraftName).toLowerCase())
-          : false,
+        running: isKraftRunning(psOutput, lab.kraftName),
       }));
 
       return json(res, 200, labs);
@@ -464,9 +541,7 @@ function createServer(options = {}) {
         const psOutput = await kraftPs(execAsync);
         return json(res, 200, {
           ...lab,
-          running: lab.kraftName
-            ? psOutput.includes(String(lab.kraftName).toLowerCase())
-            : false,
+          running: isKraftRunning(psOutput, lab.kraftName),
         });
       }
 
@@ -548,6 +623,14 @@ function createServer(options = {}) {
       return;
     }
 
+    // Allowlist: solo assets web declarados. Impide servir código/.git/docs.
+    const relativePath = path.relative(repoRoot, fullPath).split(path.sep).join('/');
+    if (!isAllowedStatic(relativePath)) {
+      res.writeHead(404);
+      res.end('Not found');
+      return;
+    }
+
     fs.readFile(fullPath, (error, data) => {
       if (error) {
         res.writeHead(404);
@@ -563,7 +646,14 @@ function createServer(options = {}) {
   }
 
   const server = http.createServer(async (req, res) => {
-    const pathname = new URL(req.url, `http://${req.headers.host || `${host}:${port}`}`).pathname;
+    const localPort = req.socket.localPort || port;
+    // Anti DNS-rebinding: rechaza cualquier Host que no sea localhost:puerto.
+    if (!isAllowedHost(req.headers.host, localPort)) {
+      return json(res, 403, { error: 'Host no permitido' });
+    }
+
+    // Base fija (no el Host controlado por el cliente) — solo necesitamos el pathname.
+    const pathname = new URL(req.url, 'http://localhost').pathname;
     // Raw, un-normalized path for static serving: the WHATWG URL parser decodes
     // and collapses encoded dot-segments (e.g. `%2e%2e`), which would hide path
     // traversal from resolveStaticPath. req.url is never decoded by the http server,
@@ -627,6 +717,9 @@ module.exports = {
   detectWslDistro,
   getDiagnostics,
   healthCheck,
+  isAllowedHost,
+  isAllowedStatic,
+  isKraftRunning,
   isPathInside,
   isTrustedStateChange,
   loadConfig,
